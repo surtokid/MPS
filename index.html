@@ -1,0 +1,1607 @@
+<!DOCTYPE html>
+<html lang="id" class="h-full bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitoring Program Supplier Suryatokoku</title>
+    
+    <!-- Google Fonts Inter & Material Symbols -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#fff1f2',
+                            100: '#ffe4e6',
+                            500: '#f43f5e',
+                            600: '#e11d48',
+                            700: '#D50000', // Corporate Suryatokoku Red
+                            800: '#9f1239',
+                            900: '#881337',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- External Libraries: Chart.js & SheetJS (Excel) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .material-symbols-outlined.fill {
+            font-variation-settings: 'FILL' 1;
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        /* Glassmorphic Effects */
+        .glass-header {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(8px);
+        }
+        /* Table Sticky Headers */
+        .table-sticky-header th {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background-color: #f8fafc;
+        }
+        /* Custom Badge Colors */
+        .badge-status {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.625rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .badge-green { background-color: #dcfce7; color: #166534; }
+        .badge-yellow { background-color: #fef9c3; color: #854d0e; }
+        .badge-blue { background-color: #dbeafe; color: #1e40af; }
+        .badge-red { background-color: #fee2e2; color: #991b1b; }
+        .badge-gray { background-color: #f1f5f9; color: #475569; }
+    </style>
+</head>
+<body class="h-full text-slate-800 antialiased bg-slate-50 font-sans selection:bg-brand-100 selection:text-brand-700">
+
+    <!-- ========================================== -->
+    <!-- SECTION 1: AUTHENTICATION SCREEN (LOGIN)    -->
+    <!-- ========================================== -->
+    <div id="screen-login" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/90 backdrop-blur-md p-4 min-h-screen">
+        <div class="w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden border border-slate-100">
+            <div class="bg-gradient-to-br from-brand-700 via-brand-600 to-red-800 p-8 text-white text-center relative">
+                <div class="w-16 h-16 bg-white/10 rounded-2xl backdrop-blur-md flex items-center justify-center mx-auto mb-4 border border-white/20">
+                    <span class="material-symbols-outlined text-3xl text-white">storefront</span>
+                </div>
+                <h1 class="text-2xl font-bold tracking-tight">SURYATOKOKU</h1>
+                <p class="text-xs text-red-100 tracking-wide mt-1 uppercase font-medium">Monitoring Program Supplier</p>
+            </div>
+            <form id="form-login" class="p-8 space-y-5">
+                <div id="login-alert" class="hidden p-3 rounded-lg bg-red-50 text-red-700 text-xs font-medium border border-red-200"></div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">Username</label>
+                    <div class="relative">
+                        <span class="material-symbols-outlined absolute left-3 top-2.5 text-slate-400 text-xl">person</span>
+                        <input type="text" id="login-username" required autocomplete="username" placeholder="Masukkan username" class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-700/20 focus:border-brand-700 transition">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">Password</label>
+                    <div class="relative">
+                        <span class="material-symbols-outlined absolute left-3 top-2.5 text-slate-400 text-xl">lock</span>
+                        <input type="password" id="login-password" required autocomplete="current-password" placeholder="••••••••" class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-700/20 focus:border-brand-700 transition">
+                    </div>
+                </div>
+                <button type="submit" id="btn-login-submit" class="w-full py-3 bg-brand-700 hover:bg-brand-800 text-white font-semibold rounded-xl text-sm shadow-lg shadow-brand-700/30 hover:shadow-brand-700/40 active:scale-[0.99] transition duration-150 flex items-center justify-center gap-2">
+                    <span>Masuk ke System</span>
+                    <span class="material-symbols-outlined text-lg">arrow_forward</span>
+                </button>
+            </form>
+            <div class="bg-slate-50 border-t border-slate-100 px-8 py-4 text-center">
+                <p class="text-xs text-slate-400">&copy; 2026 Suryatokoku Online. System v2.0 Enterprise</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- SECTION 2: MAIN APPLICATION SPA LAYOUT     -->
+    <!-- ========================================== -->
+    <div id="app-shell" class="hidden min-h-screen flex flex-col md:flex-row bg-slate-50">
+        
+        <!-- Sidebar Backdrop Overlay (Mobile) -->
+        <div id="sidebar-overlay" class="fixed inset-0 bg-slate-900/50 z-30 md:hidden hidden backdrop-blur-sm"></div>
+
+        <!-- Sidebar Navigation -->
+        <aside id="app-sidebar" class="fixed md:static inset-y-0 left-0 w-64 bg-slate-900 text-slate-300 z-40 transform -translate-x-full md:translate-x-0 transition-transform duration-200 ease-in-out flex flex-col shadow-xl">
+            <!-- Sidebar Header Brand -->
+            <div class="h-16 flex items-center px-6 bg-slate-950 border-b border-slate-800 gap-3">
+                <div class="w-9 h-9 bg-brand-700 rounded-xl flex items-center justify-center text-white font-bold shadow-md shadow-brand-700/40">
+                    <span class="material-symbols-outlined text-xl">analytics</span>
+                </div>
+                <div>
+                    <h2 class="font-bold text-white text-sm tracking-tight leading-none">SURYATOKOKU</h2>
+                    <span class="text-[10px] text-slate-400 font-medium tracking-wider uppercase">Supplier Portal</span>
+                </div>
+            </div>
+
+            <!-- Navigation Menu -->
+            <nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+                <a href="#dashboard" data-page="dashboard" class="nav-link flex items-center gap-3 px-3.5 py-2.5 text-sm font-medium rounded-xl hover:bg-slate-800 hover:text-white transition group">
+                    <span class="material-symbols-outlined text-slate-400 group-hover:text-white">dashboard</span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#sell-out" data-page="sell-out" class="nav-link flex items-center gap-3 px-3.5 py-2.5 text-sm font-medium rounded-xl hover:bg-slate-800 hover:text-white transition group">
+                    <span class="material-symbols-outlined text-slate-400 group-hover:text-white">shopping_cart</span>
+                    <span>Sell Out</span>
+                </a>
+                <a href="#sell-in" data-page="sell-in" class="nav-link flex items-center gap-3 px-3.5 py-2.5 text-sm font-medium rounded-xl hover:bg-slate-800 hover:text-white transition group">
+                    <span class="material-symbols-outlined text-slate-400 group-hover:text-white">inventory_2</span>
+                    <span>Sell In</span>
+                </a>
+                <a href="#klaim" data-page="klaim" class="nav-link flex items-center gap-3 px-3.5 py-2.5 text-sm font-medium rounded-xl hover:bg-slate-800 hover:text-white transition group">
+                    <span class="material-symbols-outlined text-slate-400 group-hover:text-white">published_with_changes</span>
+                    <span>Klaim Barang</span>
+                </a>
+                <a href="#budget" data-page="budget" class="nav-link flex items-center gap-3 px-3.5 py-2.5 text-sm font-medium rounded-xl hover:bg-slate-800 hover:text-white transition group">
+                    <span class="material-symbols-outlined text-slate-400 group-hover:text-white">account_balance_wallet</span>
+                    <span>Pemakaian Budget</span>
+                </a>
+                
+                <div class="pt-4 pb-1">
+                    <p class="px-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Pengaturan</p>
+                </div>
+                
+                <a href="#master" data-page="master" class="nav-link flex items-center gap-3 px-3.5 py-2.5 text-sm font-medium rounded-xl hover:bg-slate-800 hover:text-white transition group">
+                    <span class="material-symbols-outlined text-slate-400 group-hover:text-white">settings</span>
+                    <span>Setting Master & User</span>
+                </a>
+                <a href="#log" data-page="log" class="nav-link flex items-center gap-3 px-3.5 py-2.5 text-sm font-medium rounded-xl hover:bg-slate-800 hover:text-white transition group">
+                    <span class="material-symbols-outlined text-slate-400 group-hover:text-white">history</span>
+                    <span>Audit Log History</span>
+                </a>
+            </nav>
+
+            <!-- User Footer Profile Info -->
+            <div class="p-3 bg-slate-950 border-t border-slate-800">
+                <div class="flex items-center gap-3 p-2 rounded-xl bg-slate-900/80">
+                    <div class="w-8 h-8 rounded-full bg-brand-700/20 text-brand-500 border border-brand-700/30 flex items-center justify-center font-bold text-sm">
+                        <span id="user-avatar">A</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p id="user-display-name" class="text-xs font-semibold text-white truncate">Administrator</p>
+                        <p id="user-display-role" class="text-[10px] text-brand-400 font-medium">Role: Admin</p>
+                    </div>
+                    <button id="btn-logout" title="Logout" class="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition">
+                        <span class="material-symbols-outlined text-lg">logout</span>
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Body Area -->
+        <div class="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
+            
+            <!-- Top Navbar Bar -->
+            <header class="h-16 glass-header border-b border-slate-200/80 px-4 md:px-8 flex items-center justify-between shrink-0 z-20">
+                <div class="flex items-center gap-3">
+                    <button id="btn-toggle-sidebar" class="p-2 -ml-2 text-slate-600 hover:text-slate-900 md:hidden rounded-lg hover:bg-slate-100">
+                        <span class="material-symbols-outlined">menu</span>
+                    </button>
+                    <div>
+                        <h1 id="page-title" class="text-base font-bold text-slate-900">Dashboard Overview</h1>
+                        <p id="page-subtitle" class="text-xs text-slate-500 hidden sm:block">Pemantauan & Ringkasan Program Supplier</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <button id="btn-refresh-cache" title="Sinkronisasi / Refresh Data Cache" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 rounded-xl shadow-sm transition active:scale-95">
+                        <span class="material-symbols-outlined text-base text-slate-500">sync</span>
+                        <span class="hidden sm:inline">Sync Data</span>
+                    </button>
+                    <div class="h-6 w-px bg-slate-200 mx-1"></div>
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span class="hidden sm:inline">Online API Connected</span>
+                    </span>
+                </div>
+            </header>
+
+            <!-- Main Scrollable Views Content -->
+            <main id="main-view-container" class="flex-1 overflow-y-auto p-4 md:p-8 space-y-6">
+                
+                <!-- 1. VIEW: DASHBOARD -->
+                <section id="view-dashboard" class="page-view space-y-6">
+                    <!-- Metric Summary Cards -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div class="p-5 bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Total Sell Out</span>
+                                <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                                    <span class="material-symbols-outlined">shopping_cart</span>
+                                </div>
+                            </div>
+                            <p id="dash-sellout-val" class="text-2xl font-bold text-slate-900 mt-2">Rp 0</p>
+                            <p id="dash-sellout-count" class="text-xs text-slate-500 mt-1">0 Program Aktif</p>
+                        </div>
+                        <div class="p-5 bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Total Sell In</span>
+                                <div class="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
+                                    <span class="material-symbols-outlined">inventory_2</span>
+                                </div>
+                            </div>
+                            <p id="dash-sellin-val" class="text-2xl font-bold text-slate-900 mt-2">Rp 0</p>
+                            <p id="dash-sellin-count" class="text-xs text-slate-500 mt-1">0 Program Aktif</p>
+                        </div>
+                        <div class="p-5 bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Pemakaian Budget</span>
+                                <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+                                    <span class="material-symbols-outlined">account_balance_wallet</span>
+                                </div>
+                            </div>
+                            <p id="dash-budget-val" class="text-2xl font-bold text-slate-900 mt-2">Rp 0</p>
+                            <p id="dash-budget-count" class="text-xs text-slate-500 mt-1">0 Catatan Pemakaian</p>
+                        </div>
+                        <div class="p-5 bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Klaim Selesai / Paid</span>
+                                <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                                    <span class="material-symbols-outlined">verified</span>
+                                </div>
+                            </div>
+                            <p id="dash-klaim-val" class="text-2xl font-bold text-slate-900 mt-2">Rp 0</p>
+                            <p id="dash-klaim-pending" class="text-xs text-amber-600 mt-1">Rp 0 Pending/Proses</p>
+                        </div>
+                    </div>
+
+                    <!-- Charts Grid -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="p-6 bg-white rounded-2xl border border-slate-100 shadow-sm">
+                            <h3 class="text-sm font-bold text-slate-900 mb-4 flex items-center gap-2">
+                                <span class="material-symbols-outlined text-brand-700">bar_chart</span>
+                                Realisasi Budget per Group Brand
+                            </h3>
+                            <div class="h-64 relative">
+                                <canvas id="chart-budget-brand"></canvas>
+                            </div>
+                        </div>
+                        <div class="p-6 bg-white rounded-2xl border border-slate-100 shadow-sm">
+                            <h3 class="text-sm font-bold text-slate-900 mb-4 flex items-center gap-2">
+                                <span class="material-symbols-outlined text-brand-700">show_chart</span>
+                                Trend Nominal Klaim per Bulan
+                            </h3>
+                            <div class="h-64 relative">
+                                <canvas id="chart-klaim-trend"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Activity Section -->
+                    <div class="p-6 bg-white rounded-2xl border border-slate-100 shadow-sm">
+                        <h3 class="text-sm font-bold text-slate-900 mb-4 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-brand-700">history</span>
+                            Aktivitas Perubahan Terbaru (Log History)
+                        </h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse text-xs">
+                                <thead>
+                                    <tr class="border-b border-slate-200 text-slate-500 uppercase tracking-wider bg-slate-50">
+                                        <th class="p-3">Waktu</th>
+                                        <th class="p-3">User</th>
+                                        <th class="p-3">Aksi</th>
+                                        <th class="p-3">Menu</th>
+                                        <th class="p-3">Target ID</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="dash-log-table-body" class="divide-y divide-slate-100 text-slate-700">
+                                    <tr><td colspan="5" class="p-4 text-center text-slate-400">Memuat aktivitas...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 2. VIEW: SETTING MASTER & USER -->
+                <section id="view-master" class="page-view hidden space-y-6">
+                    <!-- Tabs Header -->
+                    <div class="flex border-b border-slate-200 gap-4">
+                        <button id="tab-btn-master" class="tab-btn pb-3 px-1 text-sm font-bold text-brand-700 border-b-2 border-brand-700 flex items-center gap-2">
+                            <span class="material-symbols-outlined">tune</span>
+                            Master Dropdown Options
+                        </button>
+                        <button id="tab-btn-users" class="tab-btn pb-3 px-1 text-sm font-bold text-slate-500 hover:text-slate-800 flex items-center gap-2">
+                            <span class="material-symbols-outlined">manage_accounts</span>
+                            Manajemen User Access
+                        </button>
+                    </div>
+
+                    <!-- TAB CONTENT 1: MASTER DROPDOWN -->
+                    <div id="tab-content-master" class="space-y-4">
+                        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+                            <div class="flex items-center gap-2 w-full sm:w-auto">
+                                <span class="material-symbols-outlined text-slate-400">filter_list</span>
+                                <select id="filter-master-kategori" class="w-full sm:w-64 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-brand-700/20">
+                                    <option value="">-- Semua Kategori --</option>
+                                </select>
+                            </div>
+                            <button id="btn-add-master-item" class="w-full sm:w-auto px-4 py-2 bg-brand-700 hover:bg-brand-800 text-white rounded-xl text-xs font-semibold shadow-md shadow-brand-700/20 flex items-center justify-center gap-1.5 transition">
+                                <span class="material-symbols-outlined text-base">add</span>
+                                <span>Tambah Opsi Master</span>
+                            </button>
+                        </div>
+                        <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+                            <div class="overflow-x-auto max-h-[500px]">
+                                <table class="w-full text-left text-xs border-collapse">
+                                    <thead class="bg-slate-50 text-slate-500 uppercase tracking-wider border-b border-slate-200">
+                                        <tr>
+                                            <th class="p-3">ID</th>
+                                            <th class="p-3">Kategori Master</th>
+                                            <th class="p-3">Nilai Opsi</th>
+                                            <th class="p-3">Urutan</th>
+                                            <th class="p-3">Status</th>
+                                            <th class="p-3 text-center">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="table-body-master" class="divide-y divide-slate-100"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB CONTENT 2: USER MANAGEMENT -->
+                    <div id="tab-content-users" class="hidden space-y-4">
+                        <div class="flex justify-between items-center bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+                            <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider">Pengguna Terdaftar</h3>
+                            <button id="btn-add-user" class="px-4 py-2 bg-brand-700 hover:bg-brand-800 text-white rounded-xl text-xs font-semibold shadow-md shadow-brand-700/20 flex items-center gap-1.5 transition">
+                                <span class="material-symbols-outlined text-base">person_add</span>
+                                <span>Tambah User Baru</span>
+                            </button>
+                        </div>
+                        <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left text-xs border-collapse">
+                                    <thead class="bg-slate-50 text-slate-500 uppercase tracking-wider border-b border-slate-200">
+                                        <tr>
+                                            <th class="p-3">Username</th>
+                                            <th class="p-3">Nama Lengkap</th>
+                                            <th class="p-3">Role</th>
+                                            <th class="p-3">Status</th>
+                                            <th class="p-3">Last Login</th>
+                                            <th class="p-3 text-center">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="table-body-users" class="divide-y divide-slate-100"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 3. VIEW: SELL OUT -->
+                <section id="view-sell-out" class="page-view hidden space-y-4">
+                    <!-- Filters & Search Toolbar -->
+                    <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm space-y-3">
+                        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+                            <div class="relative flex-1">
+                                <span class="material-symbols-outlined absolute left-3 top-2.5 text-slate-400 text-lg">search</span>
+                                <input type="text" id="search-sellout" placeholder="Cari Promo, SKP, Brand..." class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-brand-700/20">
+                            </div>
+                            <div class="flex flex-wrap items-center gap-2">
+                                <button id="btn-add-sellout" class="px-4 py-2 bg-brand-700 hover:bg-brand-800 text-white rounded-xl text-xs font-semibold shadow-md shadow-brand-700/20 flex items-center gap-1.5 transition">
+                                    <span class="material-symbols-outlined text-base">add_circle</span>
+                                    <span>Program Sell Out Baru</span>
+                                </button>
+                                <button id="btn-export-sellout" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold shadow-md shadow-emerald-600/20 flex items-center gap-1 transition">
+                                    <span class="material-symbols-outlined text-base">download</span>
+                                    <span>Excel</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Dropdown Filter Row -->
+                        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 pt-2 border-t border-slate-100">
+                            <input type="month" id="filter-sellout-periode" class="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs">
+                            <select id="filter-sellout-grup" class="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs"><option value="">Grup Brand</option></select>
+                            <select id="filter-sellout-brand" class="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs"><option value="">Brand</option></select>
+                            <select id="filter-sellout-channel" class="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs"><option value="">Channel</option></select>
+                            <select id="filter-sellout-mekanisme" class="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs"><option value="">Mekanisme</option></select>
+                            <select id="filter-sellout-status" class="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs"><option value="">Status Klaim</option></select>
+                        </div>
+                    </div>
+
+                    <!-- Data Table -->
+                    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs border-collapse">
+                                <thead class="bg-slate-50 text-slate-500 uppercase tracking-wider border-b border-slate-200">
+                                    <tr>
+                                        <th class="p-3">ID / Periode</th>
+                                        <th class="p-3">Grup & Brand</th>
+                                        <th class="p-3">Promo & SKP</th>
+                                        <th class="p-3">Tanggal Program</th>
+                                        <th class="p-3">Budget SKP</th>
+                                        <th class="p-3">Nominal Klaim</th>
+                                        <th class="p-3">Mekanisme</th>
+                                        <th class="p-3">Status Klaim</th>
+                                        <th class="p-3 text-center">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="table-body-sellout" class="divide-y divide-slate-100"></tbody>
+                            </table>
+                        </div>
+                        <div id="pagination-sellout" class="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500"></div>
+                    </div>
+                </section>
+
+                <!-- 4. VIEW: SELL IN -->
+                <section id="view-sell-in" class="page-view hidden space-y-4">
+                    <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm space-y-3">
+                        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+                            <div class="relative flex-1">
+                                <span class="material-symbols-outlined absolute left-3 top-2.5 text-slate-400 text-lg">search</span>
+                                <input type="text" id="search-sellin" placeholder="Cari Program, SKP, Brand..." class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-brand-700/20">
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button id="btn-add-sellin" class="px-4 py-2 bg-brand-700 hover:bg-brand-800 text-white rounded-xl text-xs font-semibold shadow-md shadow-brand-700/20 flex items-center gap-1.5 transition">
+                                    <span class="material-symbols-outlined text-base">add_circle</span>
+                                    <span>Program Sell In Baru</span>
+                                </button>
+                                <button id="btn-export-sellin" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold shadow-md shadow-emerald-600/20 flex items-center gap-1 transition">
+                                    <span class="material-symbols-outlined text-base">download</span>
+                                    <span>Excel</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 pt-2 border-t border-slate-100">
+                            <input type="month" id="filter-sellin-periode" class="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs">
+                            <select id="filter-sellin-program" class="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs"><option value="">Nama Program</option></select>
+                            <select id="filter-sellin-grup" class="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs"><option value="">Grup Brand</option></select>
+                            <select id="filter-sellin-brand" class="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs"><option value="">Brand</option></select>
+                            <select id="filter-sellin-status" class="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs"><option value="">Status Klaim</option></select>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs border-collapse">
+                                <thead class="bg-slate-50 text-slate-500 uppercase tracking-wider border-b border-slate-200">
+                                    <tr>
+                                        <th class="p-3">ID / Periode</th>
+                                        <th class="p-3">Program & Brand</th>
+                                        <th class="p-3">SKP & Target</th>
+                                        <th class="p-3">Pencapaian (% ACH)</th>
+                                        <th class="p-3">Nominal Klaim</th>
+                                        <th class="p-3">Mekanisme</th>
+                                        <th class="p-3">Status Klaim</th>
+                                        <th class="p-3 text-center">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="table-body-sellin" class="divide-y divide-slate-100"></tbody>
+                            </table>
+                        </div>
+                        <div id="pagination-sellin" class="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500"></div>
+                    </div>
+                </section>
+
+                <!-- 5. VIEW: KLAIM BARANG -->
+                <section id="view-klaim" class="page-view hidden space-y-4">
+                    <div class="p-4 bg-amber-50 border border-amber-200 rounded-2xl text-xs text-amber-800 flex items-start gap-3">
+                        <span class="material-symbols-outlined text-amber-600 text-xl">info</span>
+                        <div>
+                            <span class="font-bold">Informasi Auto-Sync:</span> Halaman ini otomatis mengumpulkan seluruh program Sell Out & Sell In yang bermekanisme <span class="font-bold underline">Ganti Produk</span>. Perubahan Status Klaim di halaman ini akan otomatis mengubah status di program utama.
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm space-y-3">
+                        <div class="grid grid-cols-1 sm:grid-cols-4 gap-2">
+                            <input type="month" id="filter-klaim-periode" class="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs">
+                            <select id="filter-klaim-sumber" class="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs">
+                                <option value="">-- Semua Sumber Program --</option>
+                                <option value="SELL_OUT">Sell Out</option>
+                                <option value="SELL_IN">Sell In</option>
+                            </select>
+                            <select id="filter-klaim-brand" class="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs"><option value="">Brand</option></select>
+                            <select id="filter-klaim-status" class="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs"><option value="">Status Klaim</option></select>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs border-collapse">
+                                <thead class="bg-slate-50 text-slate-500 uppercase tracking-wider border-b border-slate-200">
+                                    <tr>
+                                        <th class="p-3">ID Klaim</th>
+                                        <th class="p-3">Sumber Program</th>
+                                        <th class="p-3">Brand & SKP</th>
+                                        <th class="p-3">Nominal Klaim</th>
+                                        <th class="p-3">Nominal HET</th>
+                                        <th class="p-3">Nominal HPP</th>
+                                        <th class="p-3">Selisih (HET-Klaim)</th>
+                                        <th class="p-3">PO CSA</th>
+                                        <th class="p-3">Status Klaim</th>
+                                        <th class="p-3 text-center">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="table-body-klaim" class="divide-y divide-slate-100"></tbody>
+                            </table>
+                        </div>
+                        <div id="pagination-klaim" class="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500"></div>
+                    </div>
+                </section>
+
+                <!-- 6. VIEW: PEMAKAIAN BUDGET -->
+                <section id="view-budget" class="page-view hidden space-y-4">
+                    <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3">
+                        <div class="flex items-center gap-2 w-full sm:w-auto">
+                            <span class="material-symbols-outlined text-slate-400">filter_list</span>
+                            <input type="month" id="filter-budget-periode" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium">
+                        </div>
+                        <button id="btn-add-budget" class="w-full sm:w-auto px-4 py-2 bg-brand-700 hover:bg-brand-800 text-white rounded-xl text-xs font-semibold shadow-md shadow-brand-700/20 flex items-center justify-center gap-1.5 transition">
+                            <span class="material-symbols-outlined text-base">add_circle</span>
+                            <span>Catat Pemakaian Budget</span>
+                        </button>
+                    </div>
+
+                    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs border-collapse">
+                                <thead class="bg-slate-50 text-slate-500 uppercase tracking-wider border-b border-slate-200">
+                                    <tr>
+                                        <th class="p-3">ID / Tgl Pemakaian</th>
+                                        <th class="p-3">Ref Program</th>
+                                        <th class="p-3">Grup & Brand</th>
+                                        <th class="p-3">Channel</th>
+                                        <th class="p-3">Nominal Budget</th>
+                                        <th class="p-3">Rincian Pemakaian</th>
+                                        <th class="p-3">Status</th>
+                                        <th class="p-3 text-center">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="table-body-budget" class="divide-y divide-slate-100"></tbody>
+                            </table>
+                        </div>
+                        <div id="pagination-budget" class="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500"></div>
+                    </div>
+                </section>
+
+                <!-- 7. VIEW: AUDIT LOG HISTORY -->
+                <section id="view-log" class="page-view hidden space-y-4">
+                    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs border-collapse">
+                                <thead class="bg-slate-50 text-slate-500 uppercase tracking-wider border-b border-slate-200">
+                                    <tr>
+                                        <th class="p-3">Log ID</th>
+                                        <th class="p-3">Tanggal & Jam</th>
+                                        <th class="p-3">User</th>
+                                        <th class="p-3">Aksi</th>
+                                        <th class="p-3">Menu Target</th>
+                                        <th class="p-3">Target ID</th>
+                                        <th class="p-3">Detail Perubahan</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="table-body-log" class="divide-y divide-slate-100"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- SECTION 3: APPLICATION MODALS SYSTEM       -->
+    <!-- ========================================== -->
+    
+    <!-- Modal Backdrop Overlay -->
+    <div id="modal-overlay" class="fixed inset-0 bg-slate-900/60 z-50 hidden backdrop-blur-sm transition-opacity"></div>
+
+    <!-- MODAL 1: MASTER ITEM FORM -->
+    <div id="modal-master-item" class="modal-dialog fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl border border-slate-100 w-full max-w-md overflow-hidden">
+            <div class="p-5 bg-slate-900 text-white flex justify-between items-center">
+                <h3 id="modal-master-title" class="font-bold text-sm">Tambah Opsi Master</h3>
+                <button class="btn-close-modal text-slate-400 hover:text-white"><span class="material-symbols-outlined">close</span></button>
+            </div>
+            <form id="form-master-item" class="p-5 space-y-4">
+                <input type="hidden" id="master-id">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Kategori Master</label>
+                    <select id="master-kategori" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+                        <option value="NAMA_GRUP_BRAND">NAMA_GRUP_BRAND</option>
+                        <option value="NAMA_BRAND">NAMA_BRAND</option>
+                        <option value="CHANNEL">CHANNEL</option>
+                        <option value="MEKANISME_KLAIM">MEKANISME_KLAIM</option>
+                        <option value="METODE_KLAIM">METODE_KLAIM</option>
+                        <option value="STATUS_KLAIM">STATUS_KLAIM</option>
+                        <option value="STATUS_PENCAPAIAN">STATUS_PENCAPAIAN</option>
+                        <option value="NAMA_PROGRAM">NAMA_PROGRAM</option>
+                        <option value="STATUS_PEMAKAIAN_BUDGET">STATUS_PEMAKAIAN_BUDGET</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Nilai Opsi</label>
+                    <input type="text" id="master-nilai" required placeholder="Contoh: Susu Anak / Indomaret" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Urutan</label>
+                        <input type="number" id="master-urutan" value="1" min="1" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Status</label>
+                        <select id="master-status" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+                            <option value="true">Aktif</option>
+                            <option value="false">Nonaktif</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="pt-3 flex justify-end gap-2">
+                    <button type="button" class="btn-close-modal px-4 py-2 bg-slate-100 text-slate-600 text-xs font-semibold rounded-xl">Batal</button>
+                    <button type="submit" class="px-4 py-2 bg-brand-700 text-white text-xs font-semibold rounded-xl">Simpan Data</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 2: USER MANAGEMENT FORM -->
+    <div id="modal-user-item" class="modal-dialog fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl border border-slate-100 w-full max-w-md overflow-hidden">
+            <div class="p-5 bg-slate-900 text-white flex justify-between items-center">
+                <h3 id="modal-user-title" class="font-bold text-sm">Form Pengguna</h3>
+                <button class="btn-close-modal text-slate-400 hover:text-white"><span class="material-symbols-outlined">close</span></button>
+            </div>
+            <form id="form-user-item" class="p-5 space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Username</label>
+                    <input type="text" id="user-username" required placeholder="username" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Nama Lengkap</label>
+                    <input type="text" id="user-fullname" required placeholder="Nama Lengkap User" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Password <span class="text-[10px] text-slate-400 font-normal">(Kosongkan jika tidak diubah)</span></label>
+                    <input type="password" id="user-password" placeholder="••••••••" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Role Access</label>
+                        <select id="user-role" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+                            <option value="User">User Biasa</option>
+                            <option value="Admin">Administrator</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Status Account</label>
+                        <select id="user-status" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+                            <option value="true">Aktif</option>
+                            <option value="false">Nonaktif</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="pt-3 flex justify-end gap-2">
+                    <button type="button" class="btn-close-modal px-4 py-2 bg-slate-100 text-slate-600 text-xs font-semibold rounded-xl">Batal</button>
+                    <button type="submit" class="px-4 py-2 bg-brand-700 text-white text-xs font-semibold rounded-xl">Simpan User</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 3: SELL OUT FORM -->
+    <div id="modal-sellout" class="modal-dialog fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl border border-slate-100 w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden">
+            <div class="p-5 bg-slate-900 text-white flex justify-between items-center shrink-0">
+                <h3 id="modal-sellout-title" class="font-bold text-sm">Program Sell Out</h3>
+                <button class="btn-close-modal text-slate-400 hover:text-white"><span class="material-symbols-outlined">close</span></button>
+            </div>
+            <form id="form-sellout" class="p-6 space-y-4 overflow-y-auto flex-1">
+                <input type="hidden" id="so-id">
+                
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Periode Bulan *</label>
+                        <input type="month" id="so-periode" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Grup Brand *</label>
+                        <select id="so-grup" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs"></select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Brand *</label>
+                        <select id="so-brand" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs"></select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Promo / Nama Event *</label>
+                        <input type="text" id="so-promo" required placeholder="Contoh: Merdeka Fair 2026" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Nomor SKP (Opsional)</label>
+                        <input type="text" id="so-noskp" placeholder="SKP/2026/08/001" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Channel *</label>
+                        <select id="so-channel" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs"></select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Tanggal Mulai *</label>
+                        <input type="date" id="so-tgl-mulai" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Tanggal Berakhir *</label>
+                        <input type="date" id="so-tgl-akhir" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Deskripsi Promo</label>
+                    <textarea id="so-deskripsi" rows="2" placeholder="Penjelasan rincian promo..." class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs"></textarea>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Budget SKP (Rp) *</label>
+                        <input type="number" id="so-budget" required min="0" placeholder="0" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Nominal Klaim (Rp) *</label>
+                        <input type="number" id="so-klaim" required min="0" placeholder="0" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Mekanisme Klaim *</label>
+                        <select id="so-mekanisme" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs"></select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Metode Klaim *</label>
+                        <select id="so-metode" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs"></select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Status Klaim *</label>
+                        <select id="so-status-klaim" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs"></select>
+                        <p id="so-status-hint" class="text-[10px] text-amber-600 hidden mt-0.5">Dikendalikan via Menu Klaim Barang (Ganti Produk)</p>
+                    </div>
+                </div>
+
+                <!-- Google Drive Multiple File Upload Component -->
+                <div class="border-t border-slate-100 pt-3">
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Upload Lampiran Document SKP (Google Drive)</label>
+                    <div class="flex items-center gap-3 p-3 bg-slate-50 border border-dashed border-slate-300 rounded-xl">
+                        <input type="file" id="so-file-input" multiple class="hidden">
+                        <button type="button" onclick="document.getElementById('so-file-input').click()" class="px-3 py-1.5 bg-white border border-slate-200 text-slate-700 rounded-lg text-xs font-semibold shadow-sm hover:bg-slate-100 flex items-center gap-1">
+                            <span class="material-symbols-outlined text-base">cloud_upload</span>
+                            <span>Pilih File</span>
+                        </button>
+                        <span class="text-xs text-slate-400">PDF / Image / Excel (Diunggah ke Google Drive)</span>
+                    </div>
+                    <div id="so-file-list" class="mt-2 space-y-1.5"></div>
+                </div>
+
+                <div class="pt-4 border-t border-slate-100 flex justify-end gap-2 shrink-0">
+                    <button type="button" class="btn-close-modal px-4 py-2 bg-slate-100 text-slate-600 text-xs font-semibold rounded-xl">Batal</button>
+                    <button type="submit" class="px-5 py-2 bg-brand-700 text-white text-xs font-semibold rounded-xl shadow-md shadow-brand-700/20">Simpan Sell Out</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 4: KLAIM BARANG EDIT FORM -->
+    <div id="modal-klaim-edit" class="modal-dialog fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl border border-slate-100 w-full max-w-lg overflow-hidden">
+            <div class="p-5 bg-slate-900 text-white flex justify-between items-center">
+                <h3 class="font-bold text-sm">Update Rincian Klaim Barang</h3>
+                <button class="btn-close-modal text-slate-400 hover:text-white"><span class="material-symbols-outlined">close</span></button>
+            </div>
+            <form id="form-klaim-edit" class="p-6 space-y-4">
+                <input type="hidden" id="klm-id">
+                
+                <div class="p-3 bg-slate-50 rounded-xl text-xs space-y-1 border border-slate-100">
+                    <p><strong>Sumber:</strong> <span id="klm-info-sumber">-</span> | <strong>Brand:</strong> <span id="klm-info-brand">-</span></p>
+                    <p><strong>Nominal Klaim:</strong> <span id="klm-info-nominal" class="font-bold text-brand-700">Rp 0</span></p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Nominal HET (Rp) *</label>
+                        <input type="number" id="klm-het" required min="0" placeholder="0" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Nominal HPP (Rp)</label>
+                        <input type="number" id="klm-hpp" min="0" placeholder="0" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Nomor PO CSA</label>
+                    <input type="text" id="klm-pocsa" placeholder="PO/CSA/2026/001" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Status Klaim (Sync ke Program Utama) *</label>
+                    <select id="klm-status" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs"></select>
+                </div>
+
+                <div class="pt-3 flex justify-end gap-2">
+                    <button type="button" class="btn-close-modal px-4 py-2 bg-slate-100 text-slate-600 text-xs font-semibold rounded-xl">Batal</button>
+                    <button type="submit" class="px-5 py-2 bg-brand-700 text-white text-xs font-semibold rounded-xl">Update & Sync Status</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 5: CONFIRMATION DELETE MODAL -->
+    <div id="modal-confirm-delete" class="modal-dialog fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl border border-slate-100 w-full max-w-sm p-6 text-center space-y-4">
+            <div class="w-12 h-12 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto">
+                <span class="material-symbols-outlined text-2xl">delete_forever</span>
+            </div>
+            <div>
+                <h3 class="font-bold text-slate-900 text-base">Hapus Data Ini?</h3>
+                <p class="text-xs text-slate-500 mt-1">Tindakan ini tidak dapat dibatalkan dan akan dicatat pada Log History audit trail.</p>
+            </div>
+            <div class="flex items-center justify-center gap-3">
+                <button type="button" class="btn-close-modal px-4 py-2 bg-slate-100 text-slate-600 text-xs font-semibold rounded-xl w-full">Batal</button>
+                <button type="button" id="btn-confirm-delete-submit" class="px-4 py-2 bg-red-600 text-white text-xs font-semibold rounded-xl w-full shadow-md shadow-red-600/20">Hapus Permanen</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- SECTION 4: GLOBAL NOTIFICATION & OVERLAY   -->
+    <!-- ========================================== -->
+    
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none"></div>
+
+    <!-- Loading Spinner Overlay -->
+    <div id="global-loading" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm hidden flex items-center justify-center">
+        <div class="p-6 bg-white rounded-2xl shadow-2xl flex items-center gap-4 border border-slate-100">
+            <div class="w-8 h-8 border-4 border-brand-700 border-t-transparent rounded-full animate-spin"></div>
+            <div>
+                <p class="text-xs font-bold text-slate-900">Memproses Request...</p>
+                <p class="text-[10px] text-slate-400">Menghubungkan ke Google Apps Script Server</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // MODULE 1: CONFIGURATION & CONSTANTS
+        // ==========================================
+        const CONFIG = {
+            // Web App API Endpoint URL (Google Apps Script Executable Web App URL)
+            GAS_API_URL: 'https://script.google.com/macros/s/AKfycbx_YOUR_SCRIPT_ID_HERE/exec',
+            
+            // Local Storage Session Keys
+            SESSION_KEY: 'SURYATOKOKU_SESSION_TOKEN',
+            USER_KEY: 'SURYATOKOKU_USER_INFO',
+            
+            // Master Categories
+            MASTER_KEYS: [
+                'NAMA_GRUP_BRAND',
+                'NAMA_BRAND',
+                'CHANNEL',
+                'MEKANISME_KLAIM',
+                'METODE_KLAIM',
+                'STATUS_KLAIM',
+                'STATUS_PENCAPAIAN',
+                'NAMA_PROGRAM',
+                'STATUS_PEMAKAIAN_BUDGET'
+            ],
+
+            // Badge Color Map
+            BADGE_CLASSES: {
+                'Selesai / Paid': 'badge-green',
+                'Disetujui': 'badge-blue',
+                'Proses Verifikasi': 'badge-yellow',
+                'Draft / Belum Diklaim': 'badge-gray',
+                'On Track': 'badge-green',
+                'Over Budget': 'badge-red',
+                'Tercapai': 'badge-green',
+                'Tidak Tercapai': 'badge-red'
+            }
+        };
+
+        // ==========================================
+        // MODULE 2: UTILITY HELPERS & FORMATTERS
+        // ==========================================
+        const Utils = {
+            // Format Angka ke Currency Rupiah (e.g. Rp 1.500.000)
+            formatRupiah(amount) {
+                const num = Number(amount) || 0;
+                return 'Rp ' + num.toLocaleString('id-ID');
+            },
+
+            // Format Tanggal ke lokal Indonesia (e.g. 02 Agu 2026)
+            formatDate(dateStr) {
+                if (!dateStr) return '-';
+                try {
+                    const d = new Date(dateStr);
+                    if (isNaN(d.getTime())) return dateStr;
+                    return d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+                } catch (e) {
+                    return dateStr;
+                }
+            },
+
+            // Toast Pop-up Notification System
+            showToast(message, type = 'info') {
+                const container = document.getElementById('toast-container');
+                if (!container) return;
+
+                const bgColors = {
+                    success: 'bg-emerald-600 text-white',
+                    error: 'bg-red-600 text-white',
+                    warning: 'bg-amber-500 text-white',
+                    info: 'bg-slate-800 text-white'
+                };
+
+                const icons = {
+                    success: 'check_circle',
+                    error: 'error',
+                    warning: 'warning',
+                    info: 'info'
+                };
+
+                const toast = document.createElement('div');
+                toast.className = `pointer-events-auto p-3.5 rounded-xl shadow-xl flex items-center gap-3 text-xs font-medium transform transition-all duration-300 translate-y-4 opacity-0 ${bgColors[type] || bgColors.info}`;
+                toast.innerHTML = `
+                    <span class="material-symbols-outlined text-lg">${icons[type] || 'info'}</span>
+                    <span class="flex-1">${message}</span>
+                    <button onclick="this.parentElement.remove()" class="text-white/70 hover:text-white">
+                        <span class="material-symbols-outlined text-sm">close</span>
+                    </button>
+                `;
+
+                container.appendChild(toast);
+                
+                // Animate In
+                setTimeout(() => {
+                    toast.classList.remove('translate-y-4', 'opacity-0');
+                }, 10);
+
+                // Auto Dismiss after 4 seconds
+                setTimeout(() => {
+                    toast.classList.add('opacity-0', 'translate-y-2');
+                    setTimeout(() => toast.remove(), 300);
+                }, 4000);
+            },
+
+            // Global Loading Overlay Controls
+            showLoading() {
+                const el = document.getElementById('global-loading');
+                if (el) el.classList.remove('hidden');
+            },
+
+            hideLoading() {
+                const el = document.getElementById('global-loading');
+                if (el) el.classList.add('hidden');
+            },
+
+            // Modal Dialog Controls
+            openModal(modalId) {
+                const overlay = document.getElementById('modal-overlay');
+                const modal = document.getElementById(modalId);
+                if (overlay && modal) {
+                    overlay.classList.remove('hidden');
+                    modal.classList.remove('hidden');
+                }
+            },
+
+            closeModal(modalId) {
+                const overlay = document.getElementById('modal-overlay');
+                const modal = document.getElementById(modalId);
+                if (modal) modal.classList.add('hidden');
+                
+                // Hide overlay if no other modal is visible
+                const visibleModals = document.querySelectorAll('.modal-dialog:not(.hidden)');
+                if (overlay && visibleModals.length === 0) {
+                    overlay.classList.add('hidden');
+                }
+            },
+
+            // Convert File object to Base64 String
+            fileToBase64(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.readAsDataURL(file);
+                    reader.onload = () => resolve(reader.result);
+                    reader.onerror = error => reject(error);
+                });
+            },
+
+            // Export HTML Table or Data to Excel via SheetJS
+            exportToExcel(tableId, filename = 'Export_Data.xlsx') {
+                const table = document.getElementById(tableId);
+                if (!table) {
+                    Utils.showToast('Tabel tidak ditemukan untuk diexport!', 'error');
+                    return;
+                }
+                try {
+                    const wb = XLSX.utils.table_to_book(table, { sheet: 'Sheet1' });
+                    XLSX.writeFile(wb, filename);
+                    Utils.showToast('File Excel berhasil didownload!', 'success');
+                } catch (err) {
+                    Utils.showToast('Gagal export Excel: ' + err.toString(), 'error');
+                }
+            },
+
+            // Badge Renderer Helper
+            renderBadge(status) {
+                const cls = CONFIG.BADGE_CLASSES[status] || 'badge-gray';
+                return `<span class="badge-status ${cls}">${status || 'Draft'}</span>`;
+            }
+        };
+
+        // ==========================================
+        // MODULE 3: REST API CLIENT (GAS FETCH)
+        // ==========================================
+        const ApiClient = {
+            async request(action, payload = {}, method = 'POST') {
+                const token = localStorage.getItem(CONFIG.SESSION_KEY) || '';
+                const fullPayload = {
+                    action: action,
+                    token: token,
+                    ...payload
+                };
+
+                // Fallback Mock data handler jika URL Apps Script belum dikonfigurasi oleh user
+                if (!CONFIG.GAS_API_URL || CONFIG.GAS_API_URL.includes('YOUR_SCRIPT_ID_HERE')) {
+                    console.warn(`[API Mock Fallback] Real Apps Script URL not set. Action: ${action}`);
+                    return this.getMockResponse(action, fullPayload);
+                }
+
+                try {
+                    const response = await fetch(CONFIG.GAS_API_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'text/plain;charset=utf-8',
+                        },
+                        body: JSON.stringify(fullPayload)
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP Error ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    return data;
+
+                } catch (error) {
+                    console.error('API Request Error:', error);
+                    Utils.showToast('Koneksi Server Gagal: ' + error.message, 'error');
+                    return { success: false, message: error.message };
+                }
+            },
+
+            // Mock Data Fallback Generator untuk Pengujian Frontend Instan tanpa Server Delay
+            getMockResponse(action, payload) {
+                return new Promise((resolve) => {
+                    setTimeout(() => {
+                        if (action === 'login') {
+                            if (payload.username === 'admin' && payload.password === 'admin123') {
+                                resolve({
+                                    success: true,
+                                    token: 'mock_token_admin_12345',
+                                    user: { username: 'admin', nama_lengkap: 'Administrator System', role: 'Admin' }
+                                });
+                            } else {
+                                resolve({ success: false, message: 'Username atau password salah! (Mock Default: admin / admin123)' });
+                            }
+                        } else if (action === 'getMasterData') {
+                            resolve({
+                                success: true,
+                                data: [
+                                    { id: 'MST-101', kategori: 'NAMA_GRUP_BRAND', nilai: 'Group Nutrisi', urutan: 1, status_aktif: true },
+                                    { id: 'MST-102', kategori: 'NAMA_GRUP_BRAND', nilai: 'Group Personal Care', urutan: 2, status_aktif: true },
+                                    { id: 'MST-201', kategori: 'NAMA_BRAND', nilai: 'Brand Dancow', urutan: 1, status_aktif: true },
+                                    { id: 'MST-202', kategori: 'NAMA_BRAND', nilai: 'Brand Milo', urutan: 2, status_aktif: true },
+                                    { id: 'MST-301', kategori: 'CHANNEL', nilai: 'Indomaret', urutan: 1, status_aktif: true },
+                                    { id: 'MST-302', kategori: 'CHANNEL', nilai: 'Alfamart', urutan: 2, status_aktif: true },
+                                    { id: 'MST-401', kategori: 'MEKANISME_KLAIM', nilai: 'Potongan Tagihan', urutan: 1, status_aktif: true },
+                                    { id: 'MST-402', kategori: 'MEKANISME_KLAIM', nilai: 'Ganti Produk', urutan: 2, status_aktif: true },
+                                    { id: 'MST-501', kategori: 'METODE_KLAIM', nilai: 'CN (Credit Note)', urutan: 1, status_aktif: true },
+                                    { id: 'MST-601', kategori: 'STATUS_KLAIM', nilai: 'Draft / Belum Diklaim', urutan: 1, status_aktif: true },
+                                    { id: 'MST-602', kategori: 'STATUS_KLAIM', nilai: 'Proses Verifikasi', urutan: 2, status_aktif: true },
+                                    { id: 'MST-603', kategori: 'STATUS_KLAIM', nilai: 'Disetujui', urutan: 3, status_aktif: true },
+                                    { id: 'MST-604', kategori: 'STATUS_KLAIM', nilai: 'Selesai / Paid', urutan: 4, status_aktif: true },
+                                    { id: 'MST-701', kategori: 'STATUS_PENCAPAIAN', nilai: 'Tercapai', urutan: 1, status_aktif: true },
+                                    { id: 'MST-801', kategori: 'NAMA_PROGRAM', nilai: 'Display Contest Q3', urutan: 1, status_aktif: true },
+                                    { id: 'MST-901', kategori: 'STATUS_PEMAKAIAN_BUDGET', nilai: 'On Track', urutan: 1, status_aktif: true }
+                                ]
+                            });
+                        } else if (action === 'getSellOutData') {
+                            resolve({
+                                success: true,
+                                data: [
+                                    {
+                                        id: 'SOUT-202608-0001',
+                                        tanggal_input: '2026-08-01 10:00:00',
+                                        periode_bulan: '2026-08',
+                                        nama_grup_brand: 'Group Nutrisi',
+                                        nama_brand: 'Brand Dancow',
+                                        files_skp: [{ fileName: 'SKP_Dancow_Aug.pdf', fileUrl: '#' }],
+                                        nomor_skp: 'SKP/DNC/08/2026',
+                                        channel: 'Indomaret',
+                                        tanggal_mulai: '2026-08-01',
+                                        tanggal_berakhir: '2026-08-31',
+                                        promo_nama_event: 'Merdeka Fair 2026',
+                                        deskripsi_promo: 'Promo Diskon 15% All Variant Dancow',
+                                        budget_skp: 50000000,
+                                        nominal_klaim: 45000000,
+                                        mekanisme_klaim: 'Ganti Produk',
+                                        metode_klaim: 'CN (Credit Note)',
+                                        status_klaim: 'Draft / Belum Diklaim',
+                                        tanggal_diklaim: ''
+                                    }
+                                ]
+                            });
+                        } else if (action === 'getSellInData') {
+                            resolve({ success: true, data: [] });
+                        } else if (action === 'getKlaimBarangData') {
+                            resolve({
+                                success: true,
+                                data: [
+                                    {
+                                        id: 'KLM-202608-0001',
+                                        sumber_program: 'SELL_OUT',
+                                        ref_id_program: 'SOUT-202608-0001',
+                                        periode_bulan: '2026-08',
+                                        nama_grup_brand: 'Group Nutrisi',
+                                        nama_brand: 'Brand Dancow',
+                                        files_skp: [{ fileName: 'SKP_Dancow_Aug.pdf', fileUrl: '#' }],
+                                        nomor_skp: 'SKP/DNC/08/2026',
+                                        nominal_klaim: 45000000,
+                                        nominal_het: 50000000,
+                                        nominal_hpp: 40000000,
+                                        selisih: 5000000,
+                                        nomor_po_csa: 'PO/CSA/2026/088',
+                                        status_klaim: 'Draft / Belum Diklaim',
+                                        last_updated: '2026-08-01 10:00:00'
+                                    }
+                                ]
+                            });
+                        } else if (action === 'getBudgetData') {
+                            resolve({ success: true, data: [] });
+                        } else if (action === 'getLogHistory') {
+                            resolve({
+                                success: true,
+                                data: [
+                                    { id: 'LOG-001', tanggal: '2026-08-02', jam: '14:30:00', user_login: 'admin', aksi: 'LOGIN', nama_menu: 'AUTHENTICATION', id_data: 'admin', perubahan_lama: '-', perubahan_baru: 'User logged in' }
+                                ]
+                            });
+                        } else if (action === 'getUsers') {
+                            resolve({
+                                success: true,
+                                data: [
+                                    { username: 'admin', nama_lengkap: 'Administrator System', role: 'Admin', status_aktif: true, last_login: '2026-08-02 14:30:00' }
+                                ]
+                            });
+                        } else {
+                            resolve({ success: true, message: 'Mock action executed.', data: payload.data || {} });
+                        }
+                    }, 300);
+                });
+            }
+        };
+
+        // ==========================================
+        // MODULE 4: CLIENT MEMORY CACHE MANAGER
+        // ==========================================
+        const CACHE = {
+            user: null,
+            master: {},        // Grouped by kategori: { NAMA_BRAND: [...], CHANNEL: [...] }
+            masterRaw: [],     // Array raw master items
+            sellOut: [],
+            sellIn: [],
+            klaimBarang: [],
+            budget: [],
+            usersList: [],
+            logHistory: [],
+            isLoaded: false,
+
+            // Zero Latency Initial Fetch using Promise.all()
+            async initCacheData() {
+                Utils.showLoading();
+                try {
+                    const [masterRes, sellOutRes, sellInRes, klaimRes, budgetRes, logRes] = await Promise.all([
+                        ApiClient.request('getMasterData'),
+                        ApiClient.request('getSellOutData'),
+                        ApiClient.request('getSellInData'),
+                        ApiClient.request('getKlaimBarangData'),
+                        ApiClient.request('getBudgetData'),
+                        ApiClient.request('getLogHistory')
+                    ]);
+
+                    if (masterRes.success) this.setMasterData(masterRes.data);
+                    if (sellOutRes.success) this.sellOut = sellOutRes.data;
+                    if (sellInRes.success) this.sellIn = sellInRes.data;
+                    if (klaimRes.success) this.klaimBarang = klaimRes.data;
+                    if (budgetRes.success) this.budget = budgetRes.data;
+                    if (logRes.success) this.logHistory = logRes.data;
+
+                    // Load User list if role === Admin
+                    if (this.user && this.user.role === 'Admin') {
+                        const usersRes = await ApiClient.request('getUsers');
+                        if (usersRes.success) this.usersList = usersRes.data;
+                    }
+
+                    this.isLoaded = true;
+                    Utils.showToast('Data berhasil disinkronkan ke Cache!', 'success');
+                } catch (err) {
+                    console.error('Error initializing cache:', err);
+                    Utils.showToast('Gagal memuat data dari server', 'error');
+                } finally {
+                    Utils.hideLoading();
+                }
+            },
+
+            // Grouping raw master data into categories for dropdown population
+            setMasterData(rawList) {
+                this.masterRaw = rawList;
+                this.master = {};
+                CONFIG.MASTER_KEYS.forEach(key => {
+                    this.master[key] = rawList
+                        .filter(item => item.kategori === key && item.status_aktif)
+                        .sort((a, b) => a.urutan - b.urutan);
+                });
+            },
+
+            // Incremental Cache Mutation Helper without reloading all data
+            updateCache(key, item, action = 'SAVE') {
+                if (!this[key]) return;
+                
+                if (action === 'SAVE' || action === 'CREATE') {
+                    this[key].unshift(item);
+                } else if (action === 'UPDATE') {
+                    const index = this[key].findIndex(x => (x.id || x.username) === (item.id || item.username));
+                    if (index !== -1) {
+                        this[key][index] = item;
+                    } else {
+                        this[key].unshift(item);
+                    }
+                } else if (action === 'DELETE') {
+                    this[key] = this[key].filter(x => (x.id || x.username) !== (item.id || item.username));
+                }
+            },
+
+            // Force Re-sync Cache
+            async refreshCache() {
+                await this.initCacheData();
+                if (window.App && typeof window.App.renderCurrentView === 'function') {
+                    window.App.renderCurrentView();
+                }
+            }
+        };
+
+        // ==========================================
+        // MODULE 5: SPA ROUTER & NAVIGATION ENGINE
+        // ==========================================
+        const Router = {
+            currentPage: 'dashboard',
+
+            init() {
+                // Listen to Hash Changes
+                window.addEventListener('hashchange', () => this.handleHashChange());
+                
+                // Sidebar Link Click Events
+                document.querySelectorAll('.nav-link').forEach(link => {
+                    link.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const page = link.getAttribute('data-page');
+                        this.navigateTo(page);
+                    });
+                });
+
+                // Mobile Sidebar Drawer Toggle
+                const toggleBtn = document.getElementById('btn-toggle-sidebar');
+                const sidebar = document.getElementById('app-sidebar');
+                const overlay = document.getElementById('sidebar-overlay');
+
+                if (toggleBtn && sidebar && overlay) {
+                    toggleBtn.addEventListener('click', () => {
+                        sidebar.classList.toggle('-translate-x-full');
+                        overlay.classList.toggle('hidden');
+                    });
+
+                    overlay.addEventListener('click', () => {
+                        sidebar.classList.add('-translate-x-full');
+                        overlay.classList.add('hidden');
+                    });
+                }
+            },
+
+            navigateTo(pageName) {
+                if (!pageName) pageName = 'dashboard';
+                window.location.hash = pageName;
+                this.currentPage = pageName;
+                this.renderPage(pageName);
+            },
+
+            handleHashChange() {
+                const hash = window.location.hash.replace('#', '') || 'dashboard';
+                this.currentPage = hash;
+                this.renderPage(hash);
+            },
+
+            renderPage(pageName) {
+                // Hide all view sections
+                document.querySelectorAll('.page-view').forEach(sec => sec.classList.add('hidden'));
+
+                // Show target view section
+                const targetView = document.getElementById(`view-${pageName}`);
+                if (targetView) {
+                    targetView.classList.remove('hidden');
+                } else {
+                    document.getElementById('view-dashboard').classList.remove('hidden');
+                    pageName = 'dashboard';
+                }
+
+                // Update Active Link UI Styling in Sidebar
+                document.querySelectorAll('.nav-link').forEach(link => {
+                    if (link.getAttribute('data-page') === pageName) {
+                        link.classList.add('bg-brand-700', 'text-white');
+                        link.classList.remove('hover:bg-slate-800', 'text-slate-300');
+                    } else {
+                        link.classList.remove('bg-brand-700', 'text-white');
+                        link.classList.add('hover:bg-slate-800', 'text-slate-300');
+                    }
+                });
+
+                // Update Header Titles
+                const pageTitles = {
+                    'dashboard': { title: 'Dashboard Overview', sub: 'Pemantauan & Ringkasan Program Supplier Suryatokoku' },
+                    'sell-out': { title: 'Program Sell Out', sub: 'Kelola & Pantau Program Promosi Sell Out' },
+                    'sell-in': { title: 'Program Sell In', sub: 'Kelola Target & Pencapaian Program Sell In' },
+                    'klaim': { title: 'Klaim Barang', sub: 'Manajemen Klaim Mekanisme Ganti Produk & Sync Status' },
+                    'budget': { title: 'Pemakaian Budget', sub: 'Pencatatan & Pengawasan Realisasi Budget Supplier' },
+                    'master': { title: 'Setting Master & User', sub: 'Pengaturan Dropdown Options & Hak Akses Pengguna' },
+                    'log': { title: 'Audit Log History', sub: 'Jejak Rekam Aktivitas Perubahan Data System' }
+                };
+
+                const info = pageTitles[pageName] || pageTitles.dashboard;
+                document.getElementById('page-title').textContent = info.title;
+                document.getElementById('page-subtitle').textContent = info.sub;
+
+                // Close mobile sidebar if open
+                const sidebar = document.getElementById('app-sidebar');
+                const overlay = document.getElementById('sidebar-overlay');
+                if (sidebar && !sidebar.classList.contains('-translate-x-full')) {
+                    sidebar.classList.add('-translate-x-full');
+                    if (overlay) overlay.classList.add('hidden');
+                }
+
+                // Call Render Handler in App Controller
+                if (window.App && typeof window.App.renderCurrentView === 'function') {
+                    window.App.renderCurrentView();
+                }
+            }
+        };
+
+        // ==========================================
+        // MODULE 6: AUTHENTICATION & SESSION MANAGER
+        // ==========================================
+        const Auth = {
+            init() {
+                const loginForm = document.getElementById('form-login');
+                if (loginForm) {
+                    loginForm.addEventListener('submit', (e) => this.handleLogin(e));
+                }
+
+                const logoutBtn = document.getElementById('btn-logout');
+                if (logoutBtn) {
+                    logoutBtn.addEventListener('click', () => this.handleLogout());
+                }
+
+                this.checkSession();
+            },
+
+            async handleLogin(e) {
+                e.preventDefault();
+                const usernameInput = document.getElementById('login-username').value.trim();
+                const passwordInput = document.getElementById('login-password').value.trim();
+                const alertEl = document.getElementById('login-alert');
+
+                if (alertEl) alertEl.classList.add('hidden');
+                Utils.showLoading();
+
+                try {
+                    const res = await ApiClient.request('login', {
+                        username: usernameInput,
+                        password: passwordInput
+                    });
+
+                    if (res.success) {
+                        localStorage.setItem(CONFIG.SESSION_KEY, res.token);
+                        localStorage.setItem(CONFIG.USER_KEY, JSON.stringify(res.user));
+                        CACHE.user = res.user;
+
+                        this.showAppShell(res.user);
+                        await CACHE.initCacheData();
+                        Router.navigateTo('dashboard');
+                    } else {
+                        if (alertEl) {
+                            alertEl.textContent = res.message || 'Login gagal';
+                            alertEl.classList.remove('hidden');
+                        }
+                    }
+                } catch (err) {
+                    if (alertEl) {
+                        alertEl.textContent = 'Terjadi kesalahan sistem: ' + err.message;
+                        alertEl.classList.remove('hidden');
+                    }
+                } finally {
+                    Utils.hideLoading();
+                }
+            },
+
+            handleLogout() {
+                localStorage.removeItem(CONFIG.SESSION_KEY);
+                localStorage.removeItem(CONFIG.USER_KEY);
+                CACHE.user = null;
+                CACHE.isLoaded = false;
+
+                document.getElementById('app-shell').classList.add('hidden');
+                document.getElementById('screen-login').classList.remove('hidden');
+                Utils.showToast('Anda telah logout.', 'info');
+            },
+
+            checkSession() {
+                const token = localStorage.getItem(CONFIG.SESSION_KEY);
+                const userJson = localStorage.getItem(CONFIG.USER_KEY);
+
+                if (token && userJson) {
+                    try {
+                        const user = JSON.parse(userJson);
+                        CACHE.user = user;
+                        this.showAppShell(user);
+                        CACHE.initCacheData().then(() => {
+                            Router.handleHashChange();
+                        });
+                    } catch (e) {
+                        this.handleLogout();
+                    }
+                } else {
+                    document.getElementById('app-shell').classList.add('hidden');
+                    document.getElementById('screen-login').classList.remove('hidden');
+                }
+            },
+
+            showAppShell(user) {
+                document.getElementById('screen-login').classList.add('hidden');
+                document.getElementById('app-shell').classList.remove('hidden');
+
+                // Update User Info in Sidebar
+                document.getElementById('user-display-name').textContent = user.nama_lengkap || user.username;
+                document.getElementById('user-display-role').textContent = `Role: ${user.role || 'User'}`;
+                document.getElementById('user-avatar').textContent = (user.nama_lengkap || user.username).charAt(0).toUpperCase();
+
+                // Role-based Menu Protection (Master Setting link visibility)
+                const masterNav = document.querySelector('a[data-page="master"]');
+                if (masterNav) {
+                    if (user.role === 'Admin') {
+                        masterNav.classList.remove('hidden');
+                    } else {
+                        masterNav.classList.add('hidden');
+                    }
+                }
+            }
+        };
+
+        // ==========================================
+        // MODULE 7: DATATABLE & LAZY PAGINATION ENGINE
+        // ==========================================
+        const DataTable = {
+            // Lazy Pagination Calculator and UI Control Renderer
+            renderPagination(containerId, totalItems, currentPage, pageSize, onPageChange) {
+                const container = document.getElementById(containerId);
+                if (!container) return;
+
+                if (totalItems === 0) {
+                    container.innerHTML = '<span>Menampilkan 0 data</span>';
+                    return;
+                }
+
+                const totalPages = Math.ceil(totalItems / pageSize);
+                const startItem = (currentPage - 1) * pageSize + 1;
+                const endItem = Math.min(currentPage * pageSize, totalItems);
+
+                let buttonsHtml = '';
+                for (let i = 1; i <= totalPages; i++) {
+                    if (i === currentPage) {
+                        buttonsHtml += `<button class="px-2.5 py-1 bg-brand-700 text-white rounded-lg font-bold">${i}</button>`;
+                    } else if (i === 1 || i === totalPages || Math.abs(i - currentPage) <= 1) {
+                        buttonsHtml += `<button onclick="${onPageChange}(${i})" class="px-2.5 py-1 bg-white border border-slate-200 rounded-lg text-slate-700 hover:bg-slate-100">${i}</button>`;
+                    } else if (Math.abs(i - currentPage) === 2) {
+                        buttonsHtml += `<span class="px-1 text-slate-400">...</span>`;
+                    }
+                }
+
+                container.innerHTML = `
+                    <div>Menampilkan <strong>${startItem} - ${endItem}</strong> dari <strong>${totalItems}</strong> data</div>
+                    <div class="flex items-center gap-1">${buttonsHtml}</div>
+                `;
+            },
+
+            // Client-Side Search & Multi-Column Filter Engine
+            filterDataset(dataset, searchKeyword, filterConfig = {}) {
+                if (!Array.isArray(dataset)) return [];
+
+                return dataset.filter(item => {
+                    // Search Keyword Match
+                    if (searchKeyword && searchKeyword.trim() !== '') {
+                        const kw = searchKeyword.toLowerCase();
+                        const matchKw = Object.values(item).some(val => 
+                            val !== null && val !== undefined && val.toString().toLowerCase().includes(kw)
+                        );
+                        if (!matchKw) return false;
+                    }
+
+                    // Strict Exact Match Filters
+                    for (const [key, val] of Object.entries(filterConfig)) {
+                        if (val !== undefined && val !== null && val !== '') {
+                            if (item[key] === undefined || item[key].toString() !== val.toString()) {
+                                return false;
+                            }
+                        }
+                    }
+
+                    return true;
+                });
+            }
+        };
+
+        // Initialize Phase 4 Architecture Modules on DOM Load
+        document.addEventListener('DOMContentLoaded', () => {
+            Router.init();
+            Auth.init();
+
+            // Refresh Cache Button Listener
+            const refreshBtn = document.getElementById('btn-refresh-cache');
+            if (refreshBtn) {
+                refreshBtn.addEventListener('click', () => CACHE.refreshCache());
+            }
+        });
+    </script>
+</body>
+</html>
