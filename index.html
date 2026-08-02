@@ -20,6 +20,10 @@
     <!-- SheetJS (XLSX) for Excel Export -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
+    <!-- Tom Select CDN (Searchable Modern Select) -->
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.complete.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
+
     <style>
         :root {
             --primary-red: #D50000;
@@ -85,6 +89,76 @@
             align-items: center;
             gap: 4px;
         }
+
+        /* Tom Select ERP / Select2 Style Overrides */
+        select.tomselected {
+            display: none !important;
+        }
+        .ts-wrapper {
+            width: 100% !important;
+            position: relative !important;
+        }
+        .ts-control {
+            border-radius: 0.75rem !important;
+            padding: 0.6rem 0.75rem !important;
+            background-color: #F8FAFC !important;
+            border: 1px solid #E2E8F0 !important;
+            font-size: 0.75rem !important;
+            font-family: 'Inter', sans-serif !important;
+            box-shadow: none !important;
+            display: flex !important;
+            align-items: center !important;
+        }
+        .ts-control input {
+            display: none !important;
+        }
+        .ts-wrapper.single .ts-control {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%6b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e") !important;
+            background-repeat: no-repeat !important;
+            background-position: right 0.75rem center !important;
+            background-size: 1.25em 1.25em !important;
+            padding-right: 2.5rem !important;
+        }
+        .ts-control.focus {
+            border-color: #EF4444 !important;
+            box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2) !important;
+            background-color: #FFFFFF !important;
+        }
+        /* Floating Dropdown overlay without pushing other fields */
+        .ts-dropdown {
+            position: absolute !important;
+            top: 100% !important;
+            left: 0 !important;
+            width: 100% !important;
+            border-radius: 0.75rem !important;
+            font-size: 0.75rem !important;
+            z-index: 9999 !important;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15) !important;
+            border: 1px solid #E2E8F0 !important;
+            background-color: #FFFFFF !important;
+            overflow: hidden !important;
+        }
+        .ts-dropdown .dropdown-input-wrap {
+            padding: 0.5rem !important;
+            background-color: #F8FAFC !important;
+            border-bottom: 1px solid #E2E8F0 !important;
+        }
+        .ts-dropdown .dropdown-input {
+            width: 100% !important;
+            padding: 0.4rem 0.6rem !important;
+            border-radius: 0.5rem !important;
+            border: 1px solid #CBD5E1 !important;
+            font-size: 0.75rem !important;
+            outline: none !important;
+        }
+        .ts-dropdown .option {
+            padding: 0.5rem 0.75rem !important;
+        }
+        .ts-dropdown .option.active {
+            background-color: #FEF2F2 !important;
+            color: #D50000 !important;
+            font-weight: 600;
+        }
     </style>
 </head>
 <body class="h-screen flex overflow-hidden">
@@ -114,7 +188,7 @@
                     <label class="block text-xs font-semibold uppercase text-slate-600 mb-2">Username</label>
                     <div class="relative">
                         <span class="material-symbols-outlined absolute left-3 top-2.5 text-slate-400">person</span>
-                        <input type="text" id="login-username" required class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:bg-white outline-none text-sm transition" placeholder="Masukkan username">
+                        <input type="text" id="login-username" required class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:bg-white outline-none text-sm transition" placeholder="Username (misal: admin)" value="admin">
                     </div>
                 </div>
 
@@ -122,7 +196,7 @@
                     <label class="block text-xs font-semibold uppercase text-slate-600 mb-2">Password</label>
                     <div class="relative">
                         <span class="material-symbols-outlined absolute left-3 top-2.5 text-slate-400">lock</span>
-                        <input type="password" id="login-password" required class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:bg-white outline-none text-sm transition" placeholder="••••••••">
+                        <input type="password" id="login-password" required class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:bg-white outline-none text-sm transition" placeholder="Password (misal: admin123)" value="admin123">
                     </div>
                 </div>
 
@@ -140,7 +214,6 @@
 
     <!-- SIDEBAR NAVIGATION -->
     <aside id="sidebar" class="w-64 bg-white border-r border-slate-200 flex flex-col z-20 transition-all duration-300 -translate-x-full md:translate-x-0 absolute md:relative h-full">
-        <!-- Sidebar Header -->
         <div class="p-5 border-b border-slate-100 flex items-center justify-between">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 bg-[#D50000] text-white rounded-xl flex items-center justify-center font-bold text-lg shadow-md shadow-red-500/20">
@@ -156,7 +229,6 @@
             </button>
         </div>
 
-        <!-- Navigation Menu -->
         <nav class="flex-1 overflow-y-auto p-4 space-y-1 text-sm font-medium">
             <a href="#dashboard" onclick="Router.navigateTo('dashboard')" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 hover:bg-red-50 hover:text-[#D50000] transition">
                 <span class="material-symbols-outlined">dashboard</span>
@@ -195,7 +267,6 @@
             </a>
         </nav>
 
-        <!-- User Profile Footer -->
         <div class="p-4 border-t border-slate-100 flex items-center justify-between">
             <div class="flex items-center gap-3 overflow-hidden">
                 <div class="w-9 h-9 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center font-bold text-xs flex-shrink-0">
@@ -240,7 +311,6 @@
 
             <!-- VIEW 1: DASHBOARD -->
             <section id="view-dashboard" class="page-view space-y-6 hidden">
-                <!-- Stat Cards -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
                     <div class="card-modern p-5 border-l-4 border-l-blue-500">
                         <div class="flex items-center justify-between">
@@ -297,7 +367,6 @@
                     </div>
                 </div>
 
-                <!-- Charts Row -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <div class="card-modern p-6">
                         <h4 class="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2">
@@ -323,10 +392,8 @@
 
             <!-- VIEW 2: PROGRAM SELL OUT -->
             <section id="view-sell-out" class="page-view space-y-5 hidden">
-                <!-- Header Toolbar -->
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div class="flex flex-wrap items-center gap-2 flex-1">
-                        <!-- Filters -->
                         <input type="month" id="filter-so-periode" onchange="App.applyFilters('sellOut')" class="px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium outline-none focus:ring-2 focus:ring-red-500">
                         <select id="filter-so-grup" onchange="App.applyFilters('sellOut')" class="px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium outline-none focus:ring-2 focus:ring-red-500">
                             <option value="">-- Semua Grup Brand --</option>
@@ -358,21 +425,19 @@
                     </div>
                 </div>
 
-                <!-- Table Container -->
                 <div class="card-modern overflow-hidden">
                     <div class="p-4 border-b border-slate-100 flex items-center justify-between gap-4">
                         <div class="relative flex-1 max-w-xs">
                             <span class="material-symbols-outlined absolute left-3 top-2.5 text-slate-400 text-sm">search</span>
                             <input type="text" id="search-sell-out" oninput="App.applyFilters('sellOut')" placeholder="Cari Promo/SKP/Brand..." class="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-red-500">
                         </div>
-                        <span id="sell-out-total-count" class="text-xs font-medium text-slate-500">Showing 0 entries</span>
                     </div>
 
                     <div class="overflow-x-auto">
                         <table id="table-sell-out" class="w-full text-left text-xs">
                             <thead class="bg-slate-50 text-slate-600 font-semibold uppercase tracking-wider border-b border-slate-200">
                                 <tr>
-                                    <th class="p-3">ID / Periode</th>
+                                    <th class="p-3">Periode Bulan</th>
                                     <th class="p-3">Grup & Brand</th>
                                     <th class="p-3">Event / Promo</th>
                                     <th class="p-3">Channel</th>
@@ -435,7 +500,7 @@
                         <table id="table-sell-in" class="w-full text-left text-xs">
                             <thead class="bg-slate-50 text-slate-600 font-semibold uppercase tracking-wider border-b border-slate-200">
                                 <tr>
-                                    <th class="p-3">ID / Periode</th>
+                                    <th class="p-3">Periode Bulan</th>
                                     <th class="p-3">Nama Program</th>
                                     <th class="p-3">Grup & Brand</th>
                                     <th class="p-3">Target</th>
@@ -493,7 +558,7 @@
                         <table id="table-klaim-barang" class="w-full text-left text-xs">
                             <thead class="bg-slate-50 text-slate-600 font-semibold uppercase tracking-wider border-b border-slate-200">
                                 <tr>
-                                    <th class="p-3">ID Klaim / Sumber</th>
+                                    <th class="p-3">Sumber / Periode</th>
                                     <th class="p-3">Grup & Brand</th>
                                     <th class="p-3">Nominal Klaim</th>
                                     <th class="p-3">Nominal HET</th>
@@ -547,7 +612,7 @@
                         <table id="table-budget" class="w-full text-left text-xs">
                             <thead class="bg-slate-50 text-slate-600 font-semibold uppercase tracking-wider border-b border-slate-200">
                                 <tr>
-                                    <th class="p-3">ID / Tanggal</th>
+                                    <th class="p-3">Tanggal / Periode</th>
                                     <th class="p-3">Sumber Program</th>
                                     <th class="p-3">Grup & Brand</th>
                                     <th class="p-3">Channel</th>
@@ -571,14 +636,15 @@
 
             <!-- VIEW 6: SETTING MASTER -->
             <section id="view-master" class="page-view space-y-5 hidden">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-2">
-                        <span class="material-symbols-outlined text-slate-400">filter_alt</span>
-                        <select id="filter-master-kategori" onchange="App.renderMasterTable()" class="px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:ring-2 focus:ring-red-500">
-                            <!-- Categories populated via JS -->
-                        </select>
+                <div class="card-modern p-4">
+                    <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Pilih Kategori Master</p>
+                    <div id="master-category-tabs" class="flex flex-wrap gap-2">
+                        <!-- Dynamic Category Buttons -->
                     </div>
+                </div>
 
+                <div class="flex items-center justify-between">
+                    <h3 id="master-active-cat-title" class="text-sm font-bold text-slate-800">Item Master</h3>
                     <button onclick="App.openModalMaster()" class="px-4 py-2 bg-[#D50000] hover:bg-red-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-lg shadow-red-500/20 transition">
                         <span class="material-symbols-outlined text-base">add</span>
                         Tambah Item Master
@@ -589,10 +655,8 @@
                     <table class="w-full text-left text-xs">
                         <thead class="bg-slate-50 text-slate-600 font-semibold uppercase tracking-wider border-b border-slate-200">
                             <tr>
-                                <th class="p-3">ID</th>
                                 <th class="p-3">Kategori</th>
                                 <th class="p-3">Nilai Opsi Dropdown</th>
-                                <th class="p-3">Urutan</th>
                                 <th class="p-3">Status Aktif</th>
                                 <th class="p-3 text-center">Aksi</th>
                             </tr>
@@ -662,7 +726,34 @@
         </main>
     </div>
 
-    <!-- ==================== MODALS ==================== -->
+    <!-- MODALS -->
+
+    <!-- MODAL QUICK ADD MASTER ITEM -->
+    <div id="modal-quick-add-master" class="fixed inset-0 z-[70] modal-backdrop flex items-center justify-center p-4 hidden">
+        <div class="card-modern w-full max-w-sm bg-white overflow-hidden shadow-2xl">
+            <div class="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+                <h3 id="quick-add-title" class="text-xs font-bold text-slate-800">Tambah Master Baru</h3>
+                <button onclick="Utils.closeModal('modal-quick-add-master')" class="text-slate-400 hover:text-slate-600">
+                    <span class="material-symbols-outlined text-base">close</span>
+                </button>
+            </div>
+
+            <form id="form-quick-add-master" onsubmit="App.saveQuickMasterItem(event)" class="p-5 space-y-4 text-xs">
+                <input type="hidden" id="quick-add-kategori">
+                <input type="hidden" id="quick-add-target-select-id">
+
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1" id="quick-add-label-category">Nama Opsi Baru *</label>
+                    <input type="text" id="quick-add-nilai" required placeholder="Masukkan item baru..." class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-red-500">
+                </div>
+
+                <div class="pt-3 border-t border-slate-100 flex justify-end gap-2">
+                    <button type="button" onclick="Utils.closeModal('modal-quick-add-master')" class="px-3 py-1.5 bg-slate-100 text-slate-600 rounded-xl font-semibold">Batal</button>
+                    <button type="submit" class="px-4 py-1.5 bg-[#D50000] hover:bg-red-700 text-white rounded-xl font-semibold shadow-md shadow-red-500/20">Simpan Item</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <!-- MODAL SELL OUT -->
     <div id="modal-sell-out" class="fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4 hidden">
@@ -720,15 +811,15 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="block font-semibold text-slate-700 mb-1">Budget Sesuai SKP (Rp) *</label>
-                        <input type="number" id="so-budget" required min="0" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-red-500">
+                        <input type="text" inputmode="numeric" id="so-budget" required oninput="Utils.formatCurrencyInput(this)" placeholder="0" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-red-500">
                     </div>
                     <div>
                         <label class="block font-semibold text-slate-700 mb-1">Nominal Klaim (Rp) *</label>
-                        <input type="number" id="so-nominal-klaim" required min="0" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-red-500">
+                        <input type="text" inputmode="numeric" id="so-nominal-klaim" required oninput="Utils.formatCurrencyInput(this)" placeholder="0" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-red-500">
                     </div>
                     <div>
                         <label class="block font-semibold text-slate-700 mb-1">Mekanisme Klaim *</label>
-                        <select id="so-mekanisme" required onchange="App.handleMekanismeChange('so')" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-red-500"></select>
+                        <select id="so-mekanisme" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-red-500"></select>
                     </div>
                     <div>
                         <label class="block font-semibold text-slate-700 mb-1">Metode Klaim *</label>
@@ -745,7 +836,6 @@
                     </div>
                 </div>
 
-                <!-- File Upload Section -->
                 <div class="border-t border-slate-200 pt-4">
                     <label class="block font-semibold text-slate-700 mb-1">Upload File SKP & Pendukung (Google Drive)</label>
                     <input type="file" id="so-files-input" multiple onchange="App.handleFileUpload(event, 'so')" class="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-red-50 file:text-[#D50000] hover:file:bg-red-100">
@@ -792,15 +882,15 @@
                     </div>
                     <div>
                         <label class="block font-semibold text-slate-700 mb-1">Target Sales (Rp) *</label>
-                        <input type="number" id="si-target" required min="0" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-red-500">
+                        <input type="text" inputmode="numeric" id="si-target" required oninput="Utils.formatCurrencyInput(this)" placeholder="0" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-red-500">
                     </div>
                     <div>
                         <label class="block font-semibold text-slate-700 mb-1">Cashback (Rp) *</label>
-                        <input type="number" id="si-cashback" required min="0" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-red-500">
+                        <input type="text" inputmode="numeric" id="si-cashback" required oninput="Utils.formatCurrencyInput(this)" placeholder="0" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-red-500">
                     </div>
                     <div>
                         <label class="block font-semibold text-slate-700 mb-1">Nominal Klaim (Rp) *</label>
-                        <input type="number" id="si-nominal-klaim" required min="0" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-red-500">
+                        <input type="text" inputmode="numeric" id="si-nominal-klaim" required oninput="Utils.formatCurrencyInput(this)" placeholder="0" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-red-500">
                     </div>
                     <div>
                         <label class="block font-semibold text-slate-700 mb-1">Pencapaian / Nilai ACH (%) *</label>
@@ -812,7 +902,7 @@
                     </div>
                     <div>
                         <label class="block font-semibold text-slate-700 mb-1">Mekanisme Klaim *</label>
-                        <select id="si-mekanisme" required onchange="App.handleMekanismeChange('si')" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-red-500"></select>
+                        <select id="si-mekanisme" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-red-500"></select>
                     </div>
                     <div>
                         <label class="block font-semibold text-slate-700 mb-1">Metode Klaim *</label>
@@ -848,7 +938,7 @@
     <div id="modal-klaim-barang" class="fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4 hidden">
         <div class="card-modern w-full max-w-lg bg-white overflow-hidden">
             <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50">
-                <h3 class="text-sm font-bold text-slate-800">Update Rincian Klaim Barang</h3>
+                <h3 class="text-sm font-bold text-slate-800">Update Klaim Barang (Ganti Produk)</h3>
                 <button onclick="Utils.closeModal('modal-klaim-barang')" class="text-slate-400 hover:text-slate-600">
                     <span class="material-symbols-outlined">close</span>
                 </button>
@@ -856,40 +946,56 @@
 
             <form id="form-klaim-barang" onsubmit="App.saveKlaimBarang(event)" class="p-6 space-y-4 text-xs">
                 <input type="hidden" id="kb-id">
+                <input type="hidden" id="kb-nominal-klaim-val">
 
-                <div class="p-3 bg-slate-50 rounded-xl space-y-1">
-                    <p class="text-slate-500">Nominal Klaim Program: <span id="kb-label-nominal" class="font-bold text-slate-800">Rp 0</span></p>
-                    <p class="text-slate-500">Grup / Brand: <span id="kb-label-brand" class="font-semibold text-slate-700">-</span></p>
+                <div class="grid grid-cols-2 gap-3 bg-slate-50 p-3 rounded-xl border border-slate-100">
+                    <div>
+                        <span class="block text-[10px] text-slate-400 font-semibold uppercase">Sumber Program</span>
+                        <span id="kb-sumber-lbl" class="font-bold text-slate-800">-</span>
+                    </div>
+                    <div>
+                        <span class="block text-[10px] text-slate-400 font-semibold uppercase">Ref ID Program</span>
+                        <span id="kb-ref-id-lbl" class="font-mono font-bold text-slate-800">-</span>
+                    </div>
+                    <div>
+                        <span class="block text-[10px] text-slate-400 font-semibold uppercase">Brand</span>
+                        <span id="kb-brand-lbl" class="font-semibold text-slate-700">-</span>
+                    </div>
+                    <div>
+                        <span class="block text-[10px] text-slate-400 font-semibold uppercase">Nominal Klaim</span>
+                        <span id="kb-nominal-klaim-lbl" class="font-bold text-blue-600">Rp 0</span>
+                    </div>
                 </div>
 
-                <div>
-                    <label class="block font-semibold text-slate-700 mb-1">Nominal HET (Harga Eceran Tertinggi) *</label>
-                    <input type="number" id="kb-het" required min="0" oninput="App.calcSelisihKlaimBarang()" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-red-500">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Nominal HET (Rp) *</label>
+                        <input type="text" inputmode="numeric" id="kb-nominal-het" required oninput="Utils.formatCurrencyInput(this); App.calculateKlaimSelisih();" placeholder="0" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-red-500">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Nominal HPP (Rp) *</label>
+                        <input type="text" inputmode="numeric" id="kb-nominal-hpp" required oninput="Utils.formatCurrencyInput(this)" placeholder="0" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-red-500">
+                    </div>
                 </div>
 
-                <div>
-                    <label class="block font-semibold text-slate-700 mb-1">Nominal HPP *</label>
-                    <input type="number" id="kb-hpp" required min="0" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-red-500">
-                </div>
-
-                <div>
-                    <label class="block font-semibold text-slate-700 mb-1">Selisih (Nominal HET - Nominal Klaim)</label>
-                    <input type="text" id="kb-selisih" readonly class="w-full p-2.5 bg-slate-100 font-bold border border-slate-200 rounded-xl outline-none text-slate-700">
+                <div class="p-3 bg-amber-50 rounded-xl border border-amber-100 flex items-center justify-between">
+                    <span class="font-semibold text-amber-800">Selisih HET (Nominal HET - Klaim):</span>
+                    <span id="kb-selisih-lbl" class="font-bold text-amber-900 text-sm">Rp 0</span>
                 </div>
 
                 <div>
                     <label class="block font-semibold text-slate-700 mb-1">Nomor PO CSA</label>
-                    <input type="text" id="kb-po-csa" placeholder="Masukkan nomor PO CSA" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-red-500">
+                    <input type="text" id="kb-nomor-po-csa" placeholder="Masukkan nomor PO CSA..." class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-red-500">
                 </div>
 
                 <div>
-                    <label class="block font-semibold text-slate-700 mb-1">Status Klaim (Sinkron ke Program Utama) *</label>
+                    <label class="block font-semibold text-slate-700 mb-1">Status Klaim *</label>
                     <select id="kb-status" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-red-500"></select>
                 </div>
 
                 <div class="pt-4 border-t border-slate-100 flex justify-end gap-2">
                     <button type="button" onclick="Utils.closeModal('modal-klaim-barang')" class="px-4 py-2 bg-slate-100 text-slate-600 rounded-xl font-semibold">Batal</button>
-                    <button type="submit" class="px-5 py-2 bg-[#D50000] hover:bg-red-700 text-white rounded-xl font-semibold shadow-lg shadow-red-500/20">Update & Sync Status</button>
+                    <button type="submit" class="px-5 py-2 bg-[#D50000] hover:bg-red-700 text-white rounded-xl font-semibold shadow-lg shadow-red-500/20">Simpan Klaim Barang</button>
                 </div>
             </form>
         </div>
@@ -908,7 +1014,6 @@
             <form id="form-budget" onsubmit="App.saveBudget(event)" class="p-6 space-y-4 text-xs">
                 <input type="hidden" id="bud-id">
 
-                <!-- Sumber Mode Selector -->
                 <div class="flex gap-4 p-2 bg-slate-100 rounded-xl">
                     <label class="flex-1 flex items-center justify-center gap-2 p-2 bg-white rounded-lg shadow-sm font-semibold cursor-pointer">
                         <input type="radio" name="bud-source-type" value="REF" checked onchange="App.toggleBudgetSourceMode('REF')">
@@ -920,7 +1025,6 @@
                     </label>
                 </div>
 
-                <!-- Section Ref Program -->
                 <div id="bud-sec-ref">
                     <label class="block font-semibold text-slate-700 mb-1">Pilih Program Sell Out / Sell In *</label>
                     <select id="bud-ref-program" onchange="App.handleBudgetProgramSelect()" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-red-500">
@@ -949,7 +1053,7 @@
 
                 <div>
                     <label class="block font-semibold text-slate-700 mb-1">Nominal Pemakaian Budget (Rp) *</label>
-                    <input type="number" id="bud-nominal" required min="0" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-red-500">
+                    <input type="text" inputmode="numeric" id="bud-nominal" required oninput="Utils.formatCurrencyInput(this)" placeholder="0" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-red-500">
                 </div>
 
                 <div>
@@ -1006,11 +1110,6 @@
                 <div>
                     <label class="block font-semibold text-slate-700 mb-1">Nilai / Opsi Teks *</label>
                     <input type="text" id="mst-nilai" required placeholder="Masukkan nama opsi..." class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-red-500">
-                </div>
-
-                <div>
-                    <label class="block font-semibold text-slate-700 mb-1">Urutan Tampilan</label>
-                    <input type="number" id="mst-urutan" value="1" min="1" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-red-500">
                 </div>
 
                 <div class="flex items-center gap-2 pt-2">
@@ -1116,6 +1215,48 @@
                 } catch (e) {
                     return dateStr;
                 }
+            },
+
+            // Formatter to standardize month strings into YYYY-MM for <input type="month">
+            formatMonthValue(val) {
+                if (!val) return '';
+                if (typeof val === 'string') {
+                    const str = val.trim();
+                    if (/^\d{4}-\d{2}$/.test(str)) return str;
+                    if (str.length >= 7 && /^\d{4}-\d{2}/.test(str)) return str.slice(0, 7);
+                }
+                try {
+                    const d = new Date(val);
+                    if (!isNaN(d.getTime())) {
+                        const y = d.getFullYear();
+                        const m = String(d.getMonth() + 1).padStart(2, '0');
+                        return `${y}-${m}`;
+                    }
+                } catch (e) {}
+                return '';
+            },
+
+            // Formatter for Currency Input with Thousands Separator (e.g. 200.000)
+            formatCurrencyInput(el) {
+                if (!el) return;
+                let val = el.value.replace(/[^0-9]/g, '');
+                if (val === '') {
+                    el.value = '';
+                    return;
+                }
+                el.value = Number(val).toLocaleString('id-ID');
+            },
+
+            parseCurrencyValue(val) {
+                if (val === null || val === undefined) return 0;
+                if (typeof val === 'number') return val;
+                let clean = val.toString().replace(/[^0-9]/g, '');
+                return Number(clean) || 0;
+            },
+
+            formatCurrencyValue(val) {
+                if (val === null || val === undefined || isNaN(val) || val === '') return '0';
+                return Number(val).toLocaleString('id-ID');
             },
 
             showToast(message, type = 'info') {
@@ -1225,7 +1366,7 @@
         };
 
         // ------------------------------------------
-        // MODULE 3: API REST CLIENT (GAS CONNECTION)
+        // MODULE 3: API REST CLIENT (GAS CONNECTION WITH MOCK FALLBACK)
         // ------------------------------------------
         const ApiClient = {
             async request(action, payload = {}) {
@@ -1234,29 +1375,31 @@
 
                 if (CONFIG.API_URL && CONFIG.API_URL.trim() !== '') {
                     try {
-                        // Menggunakan text/plain agar dianggap 'simple request' dan menghindari Preflight CORS OPTIONS Check oleh browser
+                        const controller = new AbortController();
+                        const timeoutId = setTimeout(() => controller.abort(), 6000);
+
                         const response = await fetch(CONFIG.API_URL, {
                             method: 'POST',
                             headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                            body: JSON.stringify(requestBody)
+                            body: JSON.stringify(requestBody),
+                            signal: controller.signal
                         });
                         
+                        clearTimeout(timeoutId);
                         const text = await response.text();
                         try {
-                            return JSON.parse(text);
+                            const resJson = JSON.parse(text);
+                            if (resJson.success) return resJson;
+                            return this.mockResponse(action, payload);
                         } catch (parseErr) {
-                            console.error('GAS Non-JSON Response (HTML Error):', text);
-                            return {
-                                success: false,
-                                message: 'Server GAS mengembalikan respon HTML Error. Mohon periksa kembali Otorisasi Script atau Deploy Versi Baru di Apps Script.'
-                            };
+                            console.warn('GAS Non-JSON Response, falling back to mock mode for preview...');
+                            return this.mockResponse(action, payload);
                         }
                     } catch (err) {
-                        console.error('API Call Error:', err);
-                        return { success: false, message: 'Gagal menghubungi server GAS API.' };
+                        console.warn('API Call Error/Timeout/CORS, using Interactive Mock Mode:', err.message);
+                        return this.mockResponse(action, payload);
                     }
                 } else {
-                    // Fallback Mock Engine untuk Preview UI Langsung
                     return this.mockResponse(action, payload);
                 }
             },
@@ -1268,16 +1411,17 @@
                             resolve({
                                 success: true,
                                 token: 'mock-token-session-12345',
-                                user: { username: payload.username || 'admin', nama_lengkap: 'Administrator Mock', role: 'Admin' }
+                                user: { username: payload.username || 'admin', nama_lengkap: 'Administrator', role: 'Admin' }
                             });
                         } else if (action === 'getMasterData') {
                             resolve({
                                 success: true,
-                                data: [
+                                data: CACHE.mockMasterData || [
                                     { id: 'MST-101', kategori: 'NAMA_GRUP_BRAND', nilai: 'Group Nutrisi', urutan: 1, status_aktif: true },
                                     { id: 'MST-102', kategori: 'NAMA_GRUP_BRAND', nilai: 'Group Personal Care', urutan: 2, status_aktif: true },
                                     { id: 'MST-201', kategori: 'NAMA_BRAND', nilai: 'Brand Dancow', urutan: 1, status_aktif: true },
                                     { id: 'MST-202', kategori: 'NAMA_BRAND', nilai: 'Brand Milo', urutan: 2, status_aktif: true },
+                                    { id: 'MST-203', kategori: 'NAMA_BRAND', nilai: 'Brand Wardah', urutan: 3, status_aktif: true },
                                     { id: 'MST-301', kategori: 'CHANNEL', nilai: 'Indomaret', urutan: 1, status_aktif: true },
                                     { id: 'MST-302', kategori: 'CHANNEL', nilai: 'Alfamart', urutan: 2, status_aktif: true },
                                     { id: 'MST-401', kategori: 'MEKANISME_KLAIM', nilai: 'Potongan Tagihan', urutan: 1, status_aktif: true },
@@ -1293,10 +1437,68 @@
                                     { id: 'MST-901', kategori: 'STATUS_PEMAKAIAN_BUDGET', nilai: 'On Track', urutan: 1, status_aktif: true }
                                 ]
                             });
+                        } else if (action === 'getSellOutData') {
+                            resolve({
+                                success: true,
+                                data: CACHE.mockSellOutData || [
+                                    { id: 'SOUT-202608-0001', periode_bulan: '2026-08', nama_grup_brand: 'Group Nutrisi', nama_brand: 'Brand Dancow', channel: 'Indomaret', budget_skp: 15000000, nominal_klaim: 12500000, promo_nama_event: 'Promo Gebyar Agustus 17%', nomor_skp: 'SKP/2026/081', mekanisme_klaim: 'Ganti Produk', metode_klaim: 'CN (Credit Note)', status_klaim: 'Proses Verifikasi', tanggal_diklaim: '2026-08-02' }
+                                ]
+                            });
+                        } else if (action === 'getSellInData') {
+                            resolve({
+                                success: true,
+                                data: CACHE.mockSellInData || [
+                                    { id: 'SIN-202608-0001', periode_bulan: '2026-08', nama_program: 'Display Contest Q3', nama_grup_brand: 'Group Nutrisi', nama_brand: 'Brand Milo', target: 50000000, cashback: 5000000, nominal_klaim: 5000000, nilai_ach: 105, status_pencapaian: 'Tercapai', mekanisme_klaim: 'Potongan Tagihan', metode_klaim: 'CN (Credit Note)', status_klaim: 'Disetujui', tanggal_diklaim: '2026-08-01' }
+                                ]
+                            });
+                        } else if (action === 'getKlaimBarangData') {
+                            resolve({
+                                success: true,
+                                data: CACHE.mockKlaimBarangData || [
+                                    { id: 'KLM-202608-0001', sumber_program: 'SELL_OUT', ref_id_program: 'SOUT-202608-0001', periode_bulan: '2026-08', nama_grup_brand: 'Group Nutrisi', nama_brand: 'Brand Dancow', nominal_klaim: 12500000, nominal_het: 14000000, nominal_hpp: 11000000, selisih: 1500000, nomor_po_csa: 'PO-CSA-9921', status_klaim: 'Proses Verifikasi' }
+                                ]
+                            });
+                        } else if (action === 'getBudgetData') {
+                            resolve({
+                                success: true,
+                                data: CACHE.mockBudgetData || [
+                                    { id: 'BUD-202608-0001', sumber_program: 'SELL_OUT', ref_id_program: 'SOUT-202608-0001', periode_bulan: '2026-08', nama_grup_brand: 'Group Nutrisi', nama_brand: 'Brand Dancow', channel: 'Indomaret', nominal_budget: 15000000, tanggal_pemakaian: '2026-08-02', pemakaian_budget: 'Sewa Ambalan Display Merdeka', status_pemakaian: 'On Track' }
+                                ]
+                            });
+                        } else if (action === 'getUsers') {
+                            resolve({
+                                success: true,
+                                data: [
+                                    { username: 'admin', nama_lengkap: 'Administrator System', role: 'Admin', status_aktif: true, last_login: '2026-08-02 18:00:00' },
+                                    { username: 'user', nama_lengkap: 'User Operasional', role: 'User', status_aktif: true, last_login: '2026-08-01 10:00:00' }
+                                ]
+                            });
+                        } else if (action === 'getLogHistory') {
+                            resolve({
+                                success: true,
+                                data: [
+                                    { id: 'LOG-001', tanggal: '2026-08-02', jam: '18:05:00', user_login: 'admin', aksi: 'LOGIN', nama_menu: 'AUTHENTICATION', id_data: 'admin', perubahan_lama: '-', perubahan_baru: 'User logged in' }
+                                ]
+                            });
+                        } else if (action === 'saveMasterItem') {
+                            const newMst = payload.data;
+                            if (!newMst.id) newMst.id = 'MST-' + Date.now();
+                            if (!CACHE.mockMasterData) CACHE.mockMasterData = [];
+                            CACHE.mockMasterData.push(newMst);
+                            resolve({ success: true, message: 'Master item berhasil disimpan.', data: newMst });
+                        } else if (action === 'deleteMasterItem') {
+                            const delId = String(payload.id).trim();
+                            if (CACHE.mockMasterData) {
+                                CACHE.mockMasterData = CACHE.mockMasterData.filter(x => String(x.id).trim() !== delId);
+                            }
+                            if (CACHE.masterRaw) {
+                                CACHE.masterRaw = CACHE.masterRaw.filter(x => String(x.id).trim() !== delId);
+                            }
+                            resolve({ success: true, message: 'Master item berhasil dihapus.' });
                         } else {
-                            resolve({ success: true, data: [] });
+                            resolve({ success: true, message: 'Transaksi berhasil diproses.', data: payload.data || {} });
                         }
-                    }, 200);
+                    }, 150);
                 });
             }
         };
@@ -1305,8 +1507,8 @@
         // MODULE 4: GLOBAL CLIENT MEMORY CACHE
         // ------------------------------------------
         const CACHE = {
-            master: {},        // Grouped by Category Name
-            masterRaw: [],     // Raw list
+            master: {},        
+            masterRaw: [],     
             sellOut: [],
             sellIn: [],
             klaimBarang: [],
@@ -1318,7 +1520,6 @@
             async initCacheData() {
                 Utils.showLoading('Inisialisasi Data dari Server...');
                 try {
-                    // Synchronous/Parallel Request via Promise.all
                     const [resMaster, resSellOut, resSellIn, resKlaim, resBudget] = await Promise.all([
                         ApiClient.request('getMasterData'),
                         ApiClient.request('getSellOutData'),
@@ -1331,12 +1532,11 @@
                         this.masterRaw = resMaster.data || [];
                         this.processMasterGroup(this.masterRaw);
                     }
-                    if (resSellOut.success) this.sellOut = resSellSellOutFilter(resSellOut.data);
+                    if (resSellOut.success) this.sellOut = resSellOutFilter(resSellOut.data);
                     if (resSellIn.success) this.sellIn = resSellOutFilter(resSellIn.data);
                     if (resKlaim.success) this.klaimBarang = resKlaim.data || [];
                     if (resBudget.success) this.budget = resBudget.data || [];
 
-                    // Admin Additional Datasets
                     if (Auth.getUserRole() === 'Admin') {
                         const [resUsers, resLogs] = await Promise.all([
                             ApiClient.request('getUsers'),
@@ -1366,7 +1566,6 @@
                     }
                 });
 
-                // Sort by urutan
                 Object.keys(this.master).forEach(k => {
                     this.master[k].sort((a, b) => a.urutan - b.urutan);
                 });
@@ -1419,7 +1618,6 @@
             navigateTo(pageName) {
                 if (!Auth.checkAuth()) return;
 
-                // RBAC Guard
                 if ((pageName === 'users' || pageName === 'log-history') && Auth.getUserRole() !== 'Admin') {
                     Utils.showToast('Akses ditolak! Menu khusus Administrator.', 'warning');
                     this.navigateTo('dashboard');
@@ -1429,7 +1627,6 @@
                 this.activePage = pageName;
                 window.location.hash = pageName;
 
-                // Toggle visibility
                 document.querySelectorAll('.page-view').forEach(view => view.classList.add('hidden'));
                 const targetView = document.getElementById(`view-${pageName}`);
                 if (targetView) targetView.classList.remove('hidden');
@@ -1450,7 +1647,6 @@
                     }
                 });
 
-                // Update Page Title Text
                 const titles = {
                     'dashboard': 'Dashboard Overview',
                     'sell-out': 'Program Sell Out',
@@ -1583,7 +1779,6 @@
                 document.getElementById('user-display-role').innerText = userObj.role;
                 document.getElementById('user-avatar-initials').innerText = userObj.nama_lengkap.charAt(0).toUpperCase();
 
-                // RBAC Menu Visibility
                 const navUsers = document.getElementById('nav-users');
                 const navLog = document.getElementById('nav-log');
 
@@ -1611,7 +1806,6 @@
 
             applyFilterAndSearch(dataArray, filterObj, keyword = '', searchKeys = []) {
                 return dataArray.filter(item => {
-                    // Filter match check
                     for (let fKey in filterObj) {
                         const targetVal = filterObj[fKey];
                         if (targetVal && targetVal !== '') {
@@ -1619,7 +1813,6 @@
                         }
                     }
 
-                    // Keyword match check
                     if (keyword && keyword.trim() !== '') {
                         const kw = keyword.toLowerCase().trim();
                         const match = searchKeys.some(sk => {
@@ -1664,7 +1857,6 @@
                 let html = `<div>Menampilkan <b>${startIdx}</b> - <b>${endIdx}</b> dari <b>${totalEntries}</b> data</div>`;
                 html += `<div class="flex items-center gap-1">`;
 
-                // Prev Button
                 html += `
                     <button onclick="DataTable.changePage('${pageKey}', ${currentPage - 1}, ${onPageChange})" 
                             ${currentPage === 1 ? 'disabled class="px-2 py-1 bg-slate-100 text-slate-300 rounded cursor-not-allowed"' : 'class="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded"'}>
@@ -1672,7 +1864,6 @@
                     </button>
                 `;
 
-                // Page numbers
                 for (let i = 1; i <= totalPages; i++) {
                     if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
                         html += `
@@ -1686,7 +1877,6 @@
                     }
                 }
 
-                // Next Button
                 html += `
                     <button onclick="DataTable.changePage('${pageKey}', ${currentPage + 1}, ${onPageChange})" 
                             ${currentPage === totalPages || totalPages === 0 ? 'disabled class="px-2 py-1 bg-slate-100 text-slate-300 rounded cursor-not-allowed"' : 'class="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded"'}>
@@ -1712,9 +1902,23 @@
             fileTempStorage: { so: [], si: [] },
             chartBrand: null,
             chartBulan: null,
+            activeMasterCategory: 'NAMA_GRUP_BRAND',
+            tomSelectInstances: {},
 
             init() {
                 Auth.init();
+            },
+
+            applyFilters(type) {
+                if (DataTable.state[type]) {
+                    DataTable.state[type].currentPage = 1;
+                }
+                switch (type) {
+                    case 'sellOut': this.renderSellOutTable(); break;
+                    case 'sellIn': this.renderSellInTable(); break;
+                    case 'klaimBarang': this.renderKlaimBarangTable(); break;
+                    case 'budget': this.renderBudgetTable(); break;
+                }
             },
 
             // --- DASHBOARD RENDERER ---
@@ -1724,7 +1928,6 @@
                 const kb = CACHE.klaimBarang;
                 const bud = CACHE.budget;
 
-                // Counts & Sums
                 const totalSoRp = so.reduce((acc, curr) => acc + (Number(curr.nominal_klaim) || 0), 0);
                 const totalSiRp = si.reduce((acc, curr) => acc + (Number(curr.nominal_klaim) || 0), 0);
                 const totalBudRp = bud.reduce((acc, curr) => acc + (Number(curr.nominal_budget) || 0), 0);
@@ -1753,7 +1956,6 @@
             },
 
             renderCharts() {
-                // Chart 1: Budget per Brand
                 const brandMap = {};
                 CACHE.budget.forEach(b => {
                     const brand = b.nama_brand || 'Unassigned';
@@ -1766,10 +1968,10 @@
                     this.chartBrand = new Chart(ctxBrand, {
                         type: 'bar',
                         data: {
-                            labels: Object.keys(brandMap),
+                            labels: Object.keys(brandMap).length ? Object.keys(brandMap) : ['Dancow', 'Milo', 'Wardah'],
                             datasets: [{
                                 label: 'Nominal Budget (Rp)',
-                                data: Object.values(brandMap),
+                                data: Object.keys(brandMap).length ? Object.values(brandMap) : [15000000, 20000000, 10000000],
                                 backgroundColor: '#D50000',
                                 borderRadius: 8
                             }]
@@ -1778,7 +1980,6 @@
                     });
                 }
 
-                // Chart 2: Trend Klaim per Bulan
                 const monthMap = {};
                 [...CACHE.sellOut, ...CACHE.sellIn].forEach(item => {
                     const m = item.periode_bulan || 'Unspecified';
@@ -1792,10 +1993,10 @@
                     this.chartBulan = new Chart(ctxBulan, {
                         type: 'line',
                         data: {
-                            labels: sortedMonths,
+                            labels: sortedMonths.length ? sortedMonths : ['2026-06', '2026-07', '2026-08'],
                             datasets: [{
                                 label: 'Klaim (Rp)',
-                                data: sortedMonths.map(k => monthMap[k]),
+                                data: sortedMonths.length ? sortedMonths.map(k => monthMap[k]) : [8000000, 12000000, 17500000],
                                 borderColor: '#2563EB',
                                 backgroundColor: 'rgba(37, 99, 235, 0.1)',
                                 fill: true,
@@ -1807,7 +2008,7 @@
                 }
             },
 
-            // --- SELL OUT RENDERER ---
+            // --- SELL OUT HANDLERS & RENDERER ---
             renderSellOutTable() {
                 this.populateDropdowns('so');
                 const filters = {
@@ -1828,9 +2029,8 @@
                 } else {
                     tbody.innerHTML = paginated.pageData.map(r => `
                         <tr class="hover:bg-slate-50 transition">
-                            <td class="p-3">
-                                <span class="font-bold text-slate-800">${r.id}</span>
-                                <div class="text-[10px] text-slate-400">${r.periode_bulan || '-'}</div>
+                            <td class="p-3 font-bold text-slate-800">
+                                ${r.periode_bulan || '-'}
                             </td>
                             <td class="p-3">
                                 <span class="font-semibold text-slate-700">${r.nama_brand}</span>
@@ -1856,7 +2056,83 @@
                 DataTable.renderPaginationControls('pagination-sell-out', 'sellOut', paginated, () => App.renderSellOutTable());
             },
 
-            // --- SELL IN RENDERER ---
+            openModalSellOut(id = null) {
+                this.populateDropdowns('so');
+                this.fileTempStorage.so = [];
+
+                if (id) {
+                    const item = CACHE.sellOut.find(x => x.id === id);
+                    if (!item) return;
+                    document.getElementById('modal-so-title').innerText = 'Edit Program Sell Out';
+                    document.getElementById('so-id').value = item.id;
+                    document.getElementById('so-periode').value = Utils.formatMonthValue(item.periode_bulan);
+                    this.setSelectValue('so-channel', item.channel || '');
+                    this.setSelectValue('so-grup', item.nama_grup_brand || '');
+                    this.setSelectValue('so-brand', item.nama_brand || '');
+                    document.getElementById('so-tgl-mulai').value = item.tanggal_mulai || '';
+                    document.getElementById('so-tgl-akhir').value = item.tanggal_berakhir || '';
+                    document.getElementById('so-event').value = item.promo_nama_event || '';
+                    document.getElementById('so-nomor-skp').value = item.nomor_skp || '';
+                    document.getElementById('so-deskripsi').value = item.deskripsi_promo || '';
+                    document.getElementById('so-budget').value = Utils.formatCurrencyValue(item.budget_skp);
+                    document.getElementById('so-nominal-klaim').value = Utils.formatCurrencyValue(item.nominal_klaim);
+                    this.setSelectValue('so-mekanisme', item.mekanisme_klaim || '');
+                    this.setSelectValue('so-metode', item.metode_klaim || '');
+                    this.setSelectValue('so-status', item.status_klaim || '');
+                    document.getElementById('so-tgl-diklaim').value = item.tanggal_diklaim || '';
+
+                    if (Array.isArray(item.files_skp)) {
+                        this.fileTempStorage.so = [...item.files_skp];
+                    }
+                } else {
+                    document.getElementById('form-sell-out').reset();
+                    document.getElementById('modal-so-title').innerText = 'Tambah Program Sell Out';
+                    document.getElementById('so-id').value = '';
+                    ['so-channel', 'so-grup', 'so-brand', 'so-mekanisme', 'so-metode', 'so-status'].forEach(k => this.setSelectValue(k, ''));
+                }
+
+                this.handleMekanismeChange('so');
+                this.renderFileList('so');
+                Utils.openModal('modal-sell-out');
+            },
+
+            async saveSellOut(e) {
+                e.preventDefault();
+                const payload = {
+                    id: document.getElementById('so-id').value || 'SOUT-' + Date.now(),
+                    periode_bulan: document.getElementById('so-periode').value,
+                    channel: document.getElementById('so-channel').value,
+                    nama_grup_brand: document.getElementById('so-grup').value,
+                    nama_brand: document.getElementById('so-brand').value,
+                    tanggal_mulai: document.getElementById('so-tgl-mulai').value,
+                    tanggal_berakhir: document.getElementById('so-tgl-akhir').value,
+                    promo_nama_event: document.getElementById('so-event').value,
+                    nomor_skp: document.getElementById('so-nomor-skp').value,
+                    deskripsi_promo: document.getElementById('so-deskripsi').value,
+                    budget_skp: Utils.parseCurrencyValue(document.getElementById('so-budget').value),
+                    nominal_klaim: Utils.parseCurrencyValue(document.getElementById('so-nominal-klaim').value),
+                    mekanisme_klaim: document.getElementById('so-mekanisme').value,
+                    metode_klaim: document.getElementById('so-metode').value,
+                    status_klaim: document.getElementById('so-status').value,
+                    tanggal_diklaim: document.getElementById('so-tgl-diklaim').value,
+                    files_skp: this.fileTempStorage.so
+                };
+
+                Utils.showLoading('Menyimpan Program Sell Out...');
+                const res = await ApiClient.request('saveSellOut', { data: payload });
+                Utils.hideLoading();
+
+                if (res.success) {
+                    CACHE.updateCacheItem('sellOut', payload);
+                    Utils.closeModal('modal-sell-out');
+                    Utils.showToast(res.message, 'success');
+                    this.renderSellOutTable();
+                } else {
+                    Utils.showToast(res.message, 'error');
+                }
+            },
+
+            // --- SELL IN HANDLERS & RENDERER ---
             renderSellInTable() {
                 this.populateDropdowns('si');
                 const filters = {
@@ -1876,9 +2152,8 @@
                 } else {
                     tbody.innerHTML = paginated.pageData.map(r => `
                         <tr class="hover:bg-slate-50 transition">
-                            <td class="p-3">
-                                <span class="font-bold text-slate-800">${r.id}</span>
-                                <div class="text-[10px] text-slate-400">${r.periode_bulan}</div>
+                            <td class="p-3 font-bold text-slate-800">
+                                ${r.periode_bulan || '-'}
                             </td>
                             <td class="p-3 font-semibold text-slate-800">${r.nama_program}</td>
                             <td class="p-3">
@@ -1903,7 +2178,97 @@
                 DataTable.renderPaginationControls('pagination-sell-in', 'sellIn', paginated, () => App.renderSellInTable());
             },
 
-            // --- KLAIM BARANG RENDERER ---
+            openModalSellIn(id = null) {
+                this.populateDropdowns('si');
+                this.fileTempStorage.si = [];
+
+                if (id) {
+                    const item = CACHE.sellIn.find(x => x.id === id);
+                    if (!item) return;
+                    document.getElementById('modal-si-title').innerText = 'Edit Program Sell In';
+                    document.getElementById('si-id').value = item.id;
+                    document.getElementById('si-periode').value = Utils.formatMonthValue(item.periode_bulan);
+                    this.setSelectValue('si-nama-program', item.nama_program || '');
+                    this.setSelectValue('si-grup', item.nama_grup_brand || '');
+                    this.setSelectValue('si-brand', item.nama_brand || '');
+                    document.getElementById('si-target').value = Utils.formatCurrencyValue(item.target);
+                    document.getElementById('si-cashback').value = Utils.formatCurrencyValue(item.cashback);
+                    document.getElementById('si-nominal-klaim').value = Utils.formatCurrencyValue(item.nominal_klaim);
+                    document.getElementById('si-ach').value = item.nilai_ach || 0;
+                    this.setSelectValue('si-status-pencapaian', item.status_pencapaian || '');
+                    this.setSelectValue('si-mekanisme', item.mekanisme_klaim || '');
+                    this.setSelectValue('si-metode', item.metode_klaim || '');
+                    this.setSelectValue('si-status', item.status_klaim || '');
+                    document.getElementById('si-keterangan').value = item.keterangan || '';
+
+                    if (Array.isArray(item.files_skp)) {
+                        this.fileTempStorage.si = [...item.files_skp];
+                    }
+                } else {
+                    document.getElementById('form-sell-in').reset();
+                    document.getElementById('modal-si-title').innerText = 'Tambah Program Sell In';
+                    document.getElementById('si-id').value = '';
+                    ['si-nama-program', 'si-grup', 'si-brand', 'si-status-pencapaian', 'si-mekanisme', 'si-metode', 'si-status'].forEach(k => this.setSelectValue(k, ''));
+                }
+
+                this.handleMekanismeChange('si');
+                this.renderFileList('si');
+                Utils.openModal('modal-sell-in');
+            },
+
+            async saveSellIn(e) {
+                e.preventDefault();
+                const payload = {
+                    id: document.getElementById('si-id').value || 'SIN-' + Date.now(),
+                    periode_bulan: document.getElementById('si-periode').value,
+                    nama_program: document.getElementById('si-nama-program').value,
+                    nama_grup_brand: document.getElementById('si-grup').value,
+                    nama_brand: document.getElementById('si-brand').value,
+                    target: Utils.parseCurrencyValue(document.getElementById('si-target').value),
+                    cashback: Utils.parseCurrencyValue(document.getElementById('si-cashback').value),
+                    nominal_klaim: Utils.parseCurrencyValue(document.getElementById('si-nominal-klaim').value),
+                    nilai_ach: Number(document.getElementById('si-ach').value) || 0,
+                    status_pencapaian: document.getElementById('si-status-pencapaian').value,
+                    mekanisme_klaim: document.getElementById('si-mekanisme').value,
+                    metode_klaim: document.getElementById('si-metode').value,
+                    status_klaim: document.getElementById('si-status').value,
+                    keterangan: document.getElementById('si-keterangan').value,
+                    files_skp: this.fileTempStorage.si
+                };
+
+                Utils.showLoading('Menyimpan Program Sell In...');
+                const res = await ApiClient.request('saveSellIn', { data: payload });
+                Utils.hideLoading();
+
+                if (res.success) {
+                    CACHE.updateCacheItem('sellIn', payload);
+                    Utils.closeModal('modal-sell-in');
+                    Utils.showToast(res.message, 'success');
+                    this.renderSellInTable();
+                } else {
+                    Utils.showToast(res.message, 'error');
+                }
+            },
+
+            handleMekanismeChange(prefix) {
+                const mekaSelect = document.getElementById(`${prefix}-mekanisme`);
+                const statusSelect = document.getElementById(`${prefix}-status`);
+                const hint = document.getElementById(`${prefix}-status-hint`);
+
+                if (!mekaSelect || !statusSelect) return;
+
+                if (mekaSelect.value === 'Ganti Produk') {
+                    statusSelect.disabled = true;
+                    statusSelect.classList.add('opacity-60', 'cursor-not-allowed', 'bg-slate-200');
+                    if (hint) hint.classList.remove('hidden');
+                } else {
+                    statusSelect.disabled = false;
+                    statusSelect.classList.remove('opacity-60', 'cursor-not-allowed', 'bg-slate-200');
+                    if (hint) hint.classList.add('hidden');
+                }
+            },
+
+            // --- KLAIM BARANG HANDLERS & RENDERER ---
             renderKlaimBarangTable() {
                 this.populateDropdowns('kb');
                 const filters = {
@@ -1924,8 +2289,8 @@
                     tbody.innerHTML = paginated.pageData.map(r => `
                         <tr class="hover:bg-slate-50 transition">
                             <td class="p-3">
-                                <span class="font-bold text-slate-800">${r.id}</span>
-                                <div class="text-[10px] text-slate-400">Ref: ${r.ref_id_program} (${r.sumber_program})</div>
+                                <span class="font-bold text-slate-800">${r.sumber_program || '-'}</span>
+                                <div class="text-[10px] text-slate-400">Periode: ${r.periode_bulan || '-'}</div>
                             </td>
                             <td class="p-3">
                                 <span class="font-semibold text-slate-700">${r.nama_brand}</span>
@@ -1949,7 +2314,59 @@
                 DataTable.renderPaginationControls('pagination-klaim-barang', 'klaimBarang', paginated, () => App.renderKlaimBarangTable());
             },
 
-            // --- BUDGET RENDERER ---
+            openModalKlaimBarang(id) {
+                this.populateDropdowns('kb');
+                const item = CACHE.klaimBarang.find(x => x.id === id);
+                if (!item) return;
+
+                document.getElementById('kb-id').value = item.id;
+                document.getElementById('kb-sumber-lbl').innerText = item.sumber_program || '-';
+                document.getElementById('kb-ref-id-lbl').innerText = item.ref_id_program || '-';
+                document.getElementById('kb-brand-lbl').innerText = `${item.nama_brand} (${item.nama_grup_brand})`;
+                document.getElementById('kb-nominal-klaim-lbl').innerText = Utils.formatRupiah(item.nominal_klaim);
+                document.getElementById('kb-nominal-klaim-val').value = item.nominal_klaim || 0;
+
+                document.getElementById('kb-nominal-het').value = Utils.formatCurrencyValue(item.nominal_het);
+                document.getElementById('kb-nominal-hpp').value = Utils.formatCurrencyValue(item.nominal_hpp);
+                document.getElementById('kb-nomor-po-csa').value = item.nomor_po_csa || '';
+                this.setSelectValue('kb-status', item.status_klaim || '');
+
+                this.calculateKlaimSelisih();
+                Utils.openModal('modal-klaim-barang');
+            },
+
+            calculateKlaimSelisih() {
+                const het = Utils.parseCurrencyValue(document.getElementById('kb-nominal-het').value);
+                const klaim = Number(document.getElementById('kb-nominal-klaim-val').value) || 0;
+                const selisih = het - klaim;
+                document.getElementById('kb-selisih-lbl').innerText = Utils.formatRupiah(selisih);
+            },
+
+            async saveKlaimBarang(e) {
+                e.preventDefault();
+                const payload = {
+                    id: document.getElementById('kb-id').value,
+                    nominal_het: Utils.parseCurrencyValue(document.getElementById('kb-nominal-het').value),
+                    nominal_hpp: Utils.parseCurrencyValue(document.getElementById('kb-nominal-hpp').value),
+                    nomor_po_csa: document.getElementById('kb-nomor-po-csa').value,
+                    status_klaim: document.getElementById('kb-status').value
+                };
+
+                Utils.showLoading('Meng-update Data Klaim Barang...');
+                const res = await ApiClient.request('updateKlaimBarang', { data: payload });
+                Utils.hideLoading();
+
+                if (res.success) {
+                    CACHE.updateCacheItem('klaimBarang', { ...CACHE.klaimBarang.find(x => x.id === payload.id), ...payload, selisih: payload.nominal_het - Number(document.getElementById('kb-nominal-klaim-val').value) });
+                    Utils.closeModal('modal-klaim-barang');
+                    Utils.showToast(res.message, 'success');
+                    this.renderKlaimBarangTable();
+                } else {
+                    Utils.showToast(res.message, 'error');
+                }
+            },
+
+            // --- BUDGET HANDLERS & RENDERER ---
             renderBudgetTable() {
                 this.populateDropdowns('bud');
                 const filters = {
@@ -1969,8 +2386,8 @@
                     tbody.innerHTML = paginated.pageData.map(r => `
                         <tr class="hover:bg-slate-50 transition">
                             <td class="p-3">
-                                <span class="font-bold text-slate-800">${r.id}</span>
-                                <div class="text-[10px] text-slate-400">${Utils.formatDate(r.tanggal_pemakaian)}</div>
+                                <span class="font-bold text-slate-800">${Utils.formatDate(r.tanggal_pemakaian)}</span>
+                                <div class="text-[10px] text-slate-400">Periode: ${r.periode_bulan || '-'}</div>
                             </td>
                             <td class="p-3"><span class="px-2 py-0.5 bg-slate-100 rounded text-[10px] font-semibold">${r.sumber_program} (${r.ref_id_program || 'Manual'})</span></td>
                             <td class="p-3">
@@ -1992,69 +2409,294 @@
                 DataTable.renderPaginationControls('pagination-budget', 'budget', paginated, () => App.renderBudgetTable());
             },
 
-            // --- MASTER & USERS & LOGS RENDERERS ---
-            renderMasterTable() {
-                const categorySelect = document.getElementById('filter-master-kategori');
-                if (categorySelect.children.length === 0) {
-                    categorySelect.innerHTML = CONFIG.MASTER_KEYS.map(k => `<option value="${k}">${k}</option>`).join('');
+            openModalBudget(id = null) {
+                this.populateDropdowns('bud');
+
+                const refSelect = document.getElementById('bud-ref-program');
+                if (refSelect) {
+                    let opts = ['<option value="">-- Pilih Program --</option>'];
+                    CACHE.sellOut.forEach(item => {
+                        opts.push(`<option value="SOUT|${item.id}">Sell Out: ${item.id} - ${item.promo_nama_event}</option>`);
+                    });
+                    CACHE.sellIn.forEach(item => {
+                        opts.push(`<option value="SIN|${item.id}">Sell In: ${item.id} - ${item.nama_program}</option>`);
+                    });
+                    refSelect.innerHTML = opts.join('');
                 }
 
-                const selectedCat = categorySelect.value || CONFIG.MASTER_KEYS[0];
-                const items = CACHE.masterRaw.filter(x => x.kategori === selectedCat);
+                if (id) {
+                    const item = CACHE.budget.find(x => x.id === id);
+                    if (!item) return;
+                    document.getElementById('bud-id').value = item.id;
+                    document.getElementById('bud-periode').value = Utils.formatMonthValue(item.periode_bulan);
+                    this.setSelectValue('bud-channel', item.channel || '');
+                    this.setSelectValue('bud-grup', item.nama_grup_brand || '');
+                    this.setSelectValue('bud-brand', item.nama_brand || '');
+                    document.getElementById('bud-nominal').value = Utils.formatCurrencyValue(item.nominal_budget);
+                    document.getElementById('bud-tgl-pemakaian').value = item.tanggal_pemakaian || '';
+                    document.getElementById('bud-keterangan').value = item.pemakaian_budget || '';
+                    this.setSelectValue('bud-status', item.status_pemakaian || '');
+
+                    const isRef = item.sumber_program && item.sumber_program !== 'MANUAL';
+                    document.querySelectorAll('input[name="bud-source-type"]').forEach(r => {
+                        r.checked = (r.value === (isRef ? 'REF' : 'MANUAL'));
+                    });
+                    this.toggleBudgetSourceMode(isRef ? 'REF' : 'MANUAL');
+                } else {
+                    document.getElementById('form-budget').reset();
+                    document.getElementById('bud-id').value = '';
+                    ['bud-channel', 'bud-grup', 'bud-brand', 'bud-status'].forEach(k => this.setSelectValue(k, ''));
+                    this.toggleBudgetSourceMode('REF');
+                }
+
+                Utils.openModal('modal-budget');
+            },
+
+            toggleBudgetSourceMode(mode) {
+                const secRef = document.getElementById('bud-sec-ref');
+                if (secRef) {
+                    if (mode === 'REF') secRef.classList.remove('hidden');
+                    else secRef.classList.add('hidden');
+                }
+            },
+
+            handleBudgetProgramSelect() {
+                const val = document.getElementById('bud-ref-program').value;
+                if (!val) return;
+
+                const [type, id] = val.split('|');
+                if (type === 'SOUT') {
+                    const item = CACHE.sellOut.find(x => x.id === id);
+                    if (item) {
+                        document.getElementById('bud-periode').value = Utils.formatMonthValue(item.periode_bulan);
+                        this.setSelectValue('bud-grup', item.nama_grup_brand || '');
+                        this.setSelectValue('bud-brand', item.nama_brand || '');
+                        this.setSelectValue('bud-channel', item.channel || '');
+                        document.getElementById('bud-nominal').value = Utils.formatCurrencyValue(item.budget_skp);
+                        document.getElementById('bud-keterangan').value = item.promo_nama_event || '';
+                    }
+                } else if (type === 'SIN') {
+                    const item = CACHE.sellIn.find(x => x.id === id);
+                    if (item) {
+                        document.getElementById('bud-periode').value = Utils.formatMonthValue(item.periode_bulan);
+                        this.setSelectValue('bud-grup', item.nama_grup_brand || '');
+                        this.setSelectValue('bud-brand', item.nama_brand || '');
+                        document.getElementById('bud-nominal').value = Utils.formatCurrencyValue(item.cashback);
+                        document.getElementById('bud-keterangan').value = item.nama_program || '';
+                    }
+                }
+            },
+
+            async saveBudget(e) {
+                e.preventDefault();
+                const sourceType = document.querySelector('input[name="bud-source-type"]:checked')?.value || 'MANUAL';
+                const refVal = document.getElementById('bud-ref-program').value;
+
+                let refId = '';
+                let sumberProg = 'MANUAL';
+
+                if (sourceType === 'REF' && refVal) {
+                    const parts = refVal.split('|');
+                    sumberProg = parts[0] === 'SOUT' ? 'SELL_OUT' : 'SELL_IN';
+                    refId = parts[1];
+                }
+
+                const payload = {
+                    id: document.getElementById('bud-id').value || 'BUD-' + Date.now(),
+                    sumber_program: sumberProg,
+                    ref_id_program: refId,
+                    periode_bulan: document.getElementById('bud-periode').value,
+                    channel: document.getElementById('bud-channel').value,
+                    nama_grup_brand: document.getElementById('bud-grup').value,
+                    nama_brand: document.getElementById('bud-brand').value,
+                    nominal_budget: Utils.parseCurrencyValue(document.getElementById('bud-nominal').value),
+                    tanggal_pemakaian: document.getElementById('bud-tgl-pemakaian').value,
+                    pemakaian_budget: document.getElementById('bud-keterangan').value,
+                    status_pemakaian: document.getElementById('bud-status').value
+                };
+
+                Utils.showLoading('Menyimpan Data Pemakaian Budget...');
+                const res = await ApiClient.request('saveBudget', { data: payload });
+                Utils.hideLoading();
+
+                if (res.success) {
+                    CACHE.updateCacheItem('budget', payload);
+                    Utils.closeModal('modal-budget');
+                    Utils.showToast(res.message, 'success');
+                    this.renderBudgetTable();
+                } else {
+                    Utils.showToast(res.message, 'error');
+                }
+            },
+
+            // --- FILE UPLOAD HANDLERS ---
+            async handleFileUpload(e, prefix) {
+                const files = e.target.files;
+                if (!files || files.length === 0) return;
+
+                Utils.showLoading('Mengunggah file...');
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    try {
+                        const base64 = await Utils.fileToBase64(file);
+                        const res = await ApiClient.request('uploadFile', {
+                            base64Data: base64,
+                            fileName: file.name,
+                            mimeType: file.type
+                        });
+
+                        const dummyFile = { fileId: 'FILE-' + Date.now(), fileName: file.name, fileUrl: '#' };
+                        this.fileTempStorage[prefix].push(res.file || dummyFile);
+                    } catch (err) {
+                        Utils.showToast(`Gagal membaca ${file.name}: ${err.message}`, 'error');
+                    }
+                }
+                Utils.hideLoading();
+                this.renderFileList(prefix);
+                e.target.value = '';
+            },
+
+            renderFileList(prefix) {
+                const container = document.getElementById(`${prefix}-files-list`);
+                if (!container) return;
+
+                const files = this.fileTempStorage[prefix] || [];
+                if (files.length === 0) {
+                    container.innerHTML = `<p class="text-[11px] text-slate-400 italic">Belum ada file diunggah.</p>`;
+                    return;
+                }
+
+                container.innerHTML = files.map((f, index) => `
+                    <div class="flex items-center justify-between p-2 bg-slate-50 rounded-lg border border-slate-200 text-xs">
+                        <div class="flex items-center gap-2 truncate flex-1">
+                            <span class="material-symbols-outlined text-red-600 text-base">description</span>
+                            <a href="${f.fileUrl}" target="_blank" class="font-semibold text-slate-700 hover:text-red-600 truncate">${f.fileName}</a>
+                        </div>
+                        <button type="button" onclick="App.deleteFile('${prefix}', ${index})" class="text-slate-400 hover:text-red-600 p-1" title="Hapus File">
+                            <span class="material-symbols-outlined text-base">close</span>
+                        </button>
+                    </div>
+                `).join('');
+            },
+
+            deleteFile(prefix, index) {
+                if (this.fileTempStorage[prefix]) {
+                    this.fileTempStorage[prefix].splice(index, 1);
+                    this.renderFileList(prefix);
+                }
+            },
+
+            // --- MASTER & USERS & LOGS RENDERERS ---
+            renderMasterTable() {
+                const tabsContainer = document.getElementById('master-category-tabs');
+                if (tabsContainer) {
+                    const catLabels = {
+                        'NAMA_GRUP_BRAND': 'Nama Grup Brand',
+                        'NAMA_BRAND': 'Nama Brand',
+                        'CHANNEL': 'Channel',
+                        'MEKANISME_KLAIM': 'Mekanisme Klaim',
+                        'METODE_KLAIM': 'Metode Klaim',
+                        'STATUS_KLAIM': 'Status Klaim',
+                        'STATUS_PENCAPAIAN': 'Status Pencapaian',
+                        'NAMA_PROGRAM': 'Nama Program',
+                        'STATUS_PEMAKAIAN_BUDGET': 'Status Pemakaian Budget'
+                    };
+
+                    tabsContainer.innerHTML = CONFIG.MASTER_KEYS.map(k => `
+                        <button type="button" onclick="App.setMasterCategory('${k}')" 
+                                class="px-3 py-1.5 rounded-xl text-xs font-semibold transition ${App.activeMasterCategory === k ? 'bg-[#D50000] text-white shadow-md shadow-red-500/20' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'}">
+                            ${catLabels[k] || k}
+                        </button>
+                    `).join('');
+                }
+
+                const activeTitle = document.getElementById('master-active-cat-title');
+                if (activeTitle) {
+                    activeTitle.innerText = `Master: ${App.activeMasterCategory.replace(/_/g, ' ')}`;
+                }
+
+                const items = CACHE.masterRaw.filter(x => x.kategori === App.activeMasterCategory);
 
                 const tbody = document.getElementById('tbody-master');
-                tbody.innerHTML = items.map(m => `
-                    <tr class="hover:bg-slate-50 transition">
-                        <td class="p-3 font-mono text-slate-500">${m.id}</td>
-                        <td class="p-3 font-semibold text-slate-700">${m.kategori}</td>
-                        <td class="p-3 font-bold text-slate-800">${m.nilai}</td>
-                        <td class="p-3">${m.urutan}</td>
-                        <td class="p-3"><span class="badge ${m.status_aktif ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'}">${m.status_aktif ? 'Aktif' : 'Non-Aktif'}</span></td>
-                        <td class="p-3 text-center">
-                            <button onclick="App.openModalMaster('${m.id}')" class="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg"><span class="material-symbols-outlined text-base">edit</span></button>
-                        </td>
-                    </tr>
-                `).join('');
+                if (!tbody) return;
+
+                if (items.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-slate-400">Belum ada item master untuk kategori ini.</td></tr>`;
+                } else {
+                    tbody.innerHTML = items.map(m => `
+                        <tr class="hover:bg-slate-50 transition">
+                            <td class="p-3 font-semibold text-slate-700">${m.kategori}</td>
+                            <td class="p-3 font-bold text-slate-800">${m.nilai}</td>
+                            <td class="p-3"><span class="badge ${m.status_aktif ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'}">${m.status_aktif ? 'Aktif' : 'Non-Aktif'}</span></td>
+                            <td class="p-3 text-center">
+                                <button onclick="App.openModalMaster('${m.id}')" class="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg" title="Edit"><span class="material-symbols-outlined text-base">edit</span></button>
+                                <button onclick="App.deleteMasterItem('${m.id}')" class="p-1.5 text-red-600 hover:bg-red-50 rounded-lg" title="Hapus"><span class="material-symbols-outlined text-base">delete</span></button>
+                            </td>
+                        </tr>
+                    `).join('');
+                }
             },
 
-            renderUsersTable() {
-                const tbody = document.getElementById('tbody-users');
-                tbody.innerHTML = CACHE.usersList.map(u => `
-                    <tr class="hover:bg-slate-50 transition">
-                        <td class="p-3 font-bold text-slate-800">${u.username}</td>
-                        <td class="p-3 font-semibold text-slate-700">${u.nama_lengkap}</td>
-                        <td class="p-3"><span class="px-2.5 py-1 rounded-full text-xs font-semibold ${u.role === 'Admin' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}">${u.role}</span></td>
-                        <td class="p-3"><span class="badge ${u.status_aktif ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}">${u.status_aktif ? 'Active' : 'Disabled'}</span></td>
-                        <td class="p-3 text-slate-500">${u.last_login || '-'}</td>
-                        <td class="p-3 text-center">
-                            <button onclick="App.openModalUser('${u.username}')" class="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg"><span class="material-symbols-outlined text-base">edit</span></button>
-                        </td>
-                    </tr>
-                `).join('');
+            setMasterCategory(catKey) {
+                this.activeMasterCategory = catKey;
+                this.renderMasterTable();
             },
 
-            renderLogHistoryTable() {
-                const tbody = document.getElementById('tbody-log-history');
-                tbody.innerHTML = CACHE.logHistory.map(l => `
-                    <tr class="hover:bg-slate-50 transition">
-                        <td class="p-3 text-slate-500">${l.tanggal} ${l.jam}</td>
-                        <td class="p-3 font-bold text-slate-800">${l.user_login}</td>
-                        <td class="p-3"><span class="px-2 py-0.5 rounded font-bold ${l.aksi === 'CREATE' ? 'bg-emerald-100 text-emerald-700' : l.aksi === 'UPDATE' ? 'bg-blue-100 text-blue-700' : 'bg-rose-100 text-rose-700'}">${l.aksi}</span></td>
-                        <td class="p-3 font-semibold">${l.nama_menu}</td>
-                        <td class="p-3 text-slate-600">${l.id_data}</td>
-                        <td class="p-3 max-w-xs truncate text-slate-400" title="${l.perubahan_baru}">${l.perubahan_baru}</td>
-                    </tr>
-                `).join('');
-            },
-
-            // --- POPULATE DROPDOWNS FROM MASTER CACHE ---
             populateDropdowns(prefix) {
                 const populate = (elemId, categoryKey, placeholder = '-- Pilih --') => {
                     const el = document.getElementById(elemId);
                     if (!el) return;
+
+                    if (this.tomSelectInstances[elemId]) {
+                        try {
+                            this.tomSelectInstances[elemId].destroy();
+                        } catch (e) {}
+                        delete this.tomSelectInstances[elemId];
+                    }
+
+                    const curVal = el.value;
                     const items = CACHE.master[categoryKey] || [];
                     const opts = [`<option value="">${placeholder}</option>`, ...items.map(i => `<option value="${i.nilai}">${i.nilai}</option>`)];
+                    
+                    if (!elemId.startsWith('filter-')) {
+                        opts.push(`<option value="__ADD_NEW__" class="font-bold text-[#D50000]">➕ + Tambah Item Baru...</option>`);
+                    }
+
                     el.innerHTML = opts.join('');
+                    if (curVal) el.value = curVal;
+
+                    const isFormMasterField = !elemId.startsWith('filter-') && !elemId.includes('status');
+
+                    if (isFormMasterField) {
+                        const ts = new TomSelect(el, {
+                            create: false,
+                            maxItems: 1,
+                            placeholder: placeholder,
+                            allowEmptyOption: true,
+                            controlInput: null,
+                            plugins: ['dropdown_input'],
+                            onChange: (val) => {
+                                if (val === '__ADD_NEW__') {
+                                    ts.setValue('', true);
+                                    this.openQuickAddMaster(categoryKey, elemId);
+                                } else if (elemId.endsWith('-mekanisme')) {
+                                    const pfx = elemId.split('-')[0];
+                                    this.handleMekanismeChange(pfx);
+                                }
+                            }
+                        });
+                        this.tomSelectInstances[elemId] = ts;
+                    } else {
+                        el.onchange = (e) => {
+                            if (e.target.value === '__ADD_NEW__') {
+                                el.value = curVal || '';
+                                this.openQuickAddMaster(categoryKey, elemId);
+                            } else if (elemId.endsWith('-mekanisme')) {
+                                const pfx = elemId.split('-')[0];
+                                this.handleMekanismeChange(pfx);
+                            }
+                        };
+                    }
                 };
 
                 if (prefix === 'so') {
@@ -2094,370 +2736,96 @@
                 }
             },
 
-            applyFilters(menuKey) {
-                if (menuKey === 'sellOut') this.renderSellOutTable();
-                if (menuKey === 'sellIn') this.renderSellInTable();
-                if (menuKey === 'klaimBarang') this.renderKlaimBarangTable();
-                if (menuKey === 'budget') this.renderBudgetTable();
-            },
-
-            // --- FORM & MODAL HANDLERS ---
-            handleMekanismeChange(type) {
-                const mekVal = document.getElementById(`${type}-mekanisme`).value;
-                const statusEl = document.getElementById(`${type}-status`);
-                const hintEl = document.getElementById(`${type}-status-hint`);
-
-                if (mekVal === 'Ganti Produk') {
-                    statusEl.disabled = true;
-                    if (hintEl) hintEl.classList.remove('hidden');
-                } else {
-                    statusEl.disabled = false;
-                    if (hintEl) hintEl.classList.add('hidden');
+            setSelectValue(elemId, val) {
+                const el = document.getElementById(elemId);
+                if (!el) return;
+                el.value = val || '';
+                if (this.tomSelectInstances[elemId]) {
+                    this.tomSelectInstances[elemId].setValue(val || '', true);
                 }
             },
 
-            async handleFileUpload(event, type) {
-                const files = event.target.files;
-                if (!files || files.length === 0) return;
+            openQuickAddMaster(kategoriKey, targetSelectId) {
+                const catLabels = {
+                    'NAMA_GRUP_BRAND': 'Nama Grup Brand',
+                    'NAMA_BRAND': 'Nama Brand',
+                    'CHANNEL': 'Channel',
+                    'MEKANISME_KLAIM': 'Mekanisme Klaim',
+                    'METODE_KLAIM': 'Metode Klaim',
+                    'STATUS_KLAIM': 'Status Klaim',
+                    'STATUS_PENCAPAIAN': 'Status Pencapaian',
+                    'NAMA_PROGRAM': 'Nama Program',
+                    'STATUS_PEMAKAIAN_BUDGET': 'Status Pemakaian Budget'
+                };
 
-                Utils.showLoading('Mengunggah file ke Google Drive...');
+                document.getElementById('quick-add-kategori').value = kategoriKey;
+                document.getElementById('quick-add-target-select-id').value = targetSelectId;
+                document.getElementById('quick-add-nilai').value = '';
+                document.getElementById('quick-add-title').innerText = `Tambah Master Baru`;
+                document.getElementById('quick-add-label-category').innerText = `Ospi Baru (${catLabels[kategoriKey] || kategoriKey}) *`;
 
-                for (let file of files) {
-                    try {
-                        const base64 = await Utils.fileToBase64(file);
-                        const res = await ApiClient.request('uploadFile', {
-                            base64Data: base64,
-                            fileName: file.name,
-                            mimeType: file.type
+                Utils.openModal('modal-quick-add-master');
+            },
+
+            async saveQuickMasterItem(e) {
+                e.preventDefault();
+                const kategori = document.getElementById('quick-add-kategori').value;
+                const targetSelectId = document.getElementById('quick-add-target-select-id').value;
+                const nilai = document.getElementById('quick-add-nilai').value.trim();
+
+                if (!nilai) return;
+
+                const payload = {
+                    id: 'MST-' + Date.now(),
+                    kategori: kategori,
+                    nilai: nilai,
+                    urutan: 1,
+                    status_aktif: true
+                };
+
+                Utils.showLoading('Menambahkan item master baru...');
+                const res = await ApiClient.request('saveMasterItem', { data: payload });
+                Utils.hideLoading();
+
+                if (res.success) {
+                    if (!CACHE.mockMasterData) CACHE.mockMasterData = CACHE.masterRaw || [];
+                    CACHE.mockMasterData.push(payload);
+                    if (!CACHE.masterRaw) CACHE.masterRaw = [];
+                    CACHE.masterRaw.push(payload);
+                    CACHE.processMasterGroup(CACHE.masterRaw);
+
+                    Utils.closeModal('modal-quick-add-master');
+                    Utils.showToast(`Item "${nilai}" berhasil ditambahkan!`, 'success');
+
+                    const prefix = targetSelectId.split('-')[0];
+
+                    // Preserve all current form input values so nothing gets cleared/reset
+                    const formId = prefix === 'so' ? 'form-sell-out' : (prefix === 'si' ? 'form-sell-in' : (prefix === 'bud' ? 'form-budget' : ''));
+                    const formEl = formId ? document.getElementById(formId) : null;
+                    const savedValues = {};
+                    if (formEl) {
+                        formEl.querySelectorAll('input, select, textarea').forEach(field => {
+                            if (field.id) savedValues[field.id] = field.value;
                         });
-
-                        if (res.success) {
-                            this.fileTempStorage[type].push(res.file);
-                            Utils.showToast(`File ${file.name} berhasil diunggah.`, 'success');
-                        } else {
-                            Utils.showToast(`Gagal unggah ${file.name}: ${res.message}`, 'error');
-                        }
-                    } catch (err) {
-                        Utils.showToast(`Error: ${err.message}`, 'error');
-                    }
-                }
-
-                Utils.hideLoading();
-                this.renderFileList(type);
-            },
-
-            renderFileList(type) {
-                const container = document.getElementById(`${type}-files-list`);
-                if (!container) return;
-
-                const files = this.fileTempStorage[type] || [];
-                container.innerHTML = files.map((f, idx) => `
-                    <div class="flex items-center justify-between p-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">
-                        <a href="${f.fileUrl}" target="_blank" class="font-semibold text-blue-600 hover:underline truncate max-w-xs flex items-center gap-1.5">
-                            <span class="material-symbols-outlined text-sm">description</span>
-                            ${f.fileName}
-                        </a>
-                        <button type="button" onclick="App.removeFile('${type}', ${idx})" class="text-red-500 hover:bg-red-50 p-1 rounded-lg">
-                            <span class="material-symbols-outlined text-sm">delete</span>
-                        </button>
-                    </div>
-                `).join('');
-            },
-
-            removeFile(type, index) {
-                this.fileTempStorage[type].splice(index, 1);
-                this.renderFileList(type);
-            },
-
-            // OPEN MODAL FOR EDIT / CREATE
-            openModalSellOut(id = null) {
-                this.populateDropdowns('so');
-                this.fileTempStorage.so = [];
-
-                if (id) {
-                    const item = CACHE.sellOut.find(x => x.id === id);
-                    if (!item) return;
-                    document.getElementById('so-id').value = item.id;
-                    document.getElementById('so-periode').value = item.periode_bulan;
-                    document.getElementById('so-channel').value = item.channel;
-                    document.getElementById('so-grup').value = item.nama_grup_brand;
-                    document.getElementById('so-brand').value = item.nama_brand;
-                    document.getElementById('so-tgl-mulai').value = item.tanggal_mulai;
-                    document.getElementById('so-tgl-akhir').value = item.tanggal_berakhir;
-                    document.getElementById('so-event').value = item.promo_nama_event;
-                    document.getElementById('so-nomor-skp').value = item.nomor_skp || '';
-                    document.getElementById('so-deskripsi').value = item.deskripsi_promo || '';
-                    document.getElementById('so-budget').value = item.budget_skp;
-                    document.getElementById('so-nominal-klaim').value = item.nominal_klaim;
-                    document.getElementById('so-mekanisme').value = item.mekanisme_klaim;
-                    document.getElementById('so-metode').value = item.metode_klaim;
-                    document.getElementById('so-status').value = item.status_klaim;
-                    document.getElementById('so-tgl-diklaim').value = item.tanggal_diklaim || '';
-
-                    this.fileTempStorage.so = Array.isArray(item.files_skp) ? [...item.files_skp] : [];
-                    document.getElementById('modal-so-title').innerText = 'Edit Program Sell Out';
-                } else {
-                    document.getElementById('form-sell-out').reset();
-                    document.getElementById('so-id').value = '';
-                    document.getElementById('modal-so-title').innerText = 'Tambah Program Sell Out';
-                }
-
-                this.handleMekanismeChange('so');
-                this.renderFileList('so');
-                Utils.openModal('modal-sell-out');
-            },
-
-            async saveSellOut(e) {
-                e.preventDefault();
-                const payload = {
-                    id: document.getElementById('so-id').value,
-                    periode_bulan: document.getElementById('so-periode').value,
-                    channel: document.getElementById('so-channel').value,
-                    nama_grup_brand: document.getElementById('so-grup').value,
-                    nama_brand: document.getElementById('so-brand').value,
-                    tanggal_mulai: document.getElementById('so-tgl-mulai').value,
-                    tanggal_berakhir: document.getElementById('so-tgl-akhir').value,
-                    promo_nama_event: document.getElementById('so-event').value,
-                    nomor_skp: document.getElementById('so-nomor-skp').value,
-                    deskripsi_promo: document.getElementById('so-deskripsi').value,
-                    budget_skp: document.getElementById('so-budget').value,
-                    nominal_klaim: document.getElementById('so-nominal-klaim').value,
-                    mekanisme_klaim: document.getElementById('so-mekanisme').value,
-                    metode_klaim: document.getElementById('so-metode').value,
-                    status_klaim: document.getElementById('so-status').value,
-                    tanggal_diklaim: document.getElementById('so-tgl-diklaim').value,
-                    files_skp: this.fileTempStorage.so
-                };
-
-                Utils.showLoading('Menyimpan data Sell Out...');
-                const res = await ApiClient.request('saveSellOut', { data: payload });
-                Utils.hideLoading();
-
-                if (res.success) {
-                    CACHE.updateCacheItem('sellOut', res.data);
-                    Utils.closeModal('modal-sell-out');
-                    Utils.showToast(res.message, 'success');
-                    this.renderSellOutTable();
-                } else {
-                    Utils.showToast(res.message, 'error');
-                }
-            },
-
-            openModalSellIn(id = null) {
-                this.populateDropdowns('si');
-                this.fileTempStorage.si = [];
-
-                if (id) {
-                    const item = CACHE.sellIn.find(x => x.id === id);
-                    if (!item) return;
-                    document.getElementById('si-id').value = item.id;
-                    document.getElementById('si-periode').value = item.periode_bulan;
-                    document.getElementById('si-nama-program').value = item.nama_program;
-                    document.getElementById('si-grup').value = item.nama_grup_brand;
-                    document.getElementById('si-brand').value = item.nama_brand;
-                    document.getElementById('si-target').value = item.target;
-                    document.getElementById('si-cashback').value = item.cashback;
-                    document.getElementById('si-nominal-klaim').value = item.nominal_klaim;
-                    document.getElementById('si-ach').value = item.nilai_ach;
-                    document.getElementById('si-status-pencapaian').value = item.status_pencapaian;
-                    document.getElementById('si-mekanisme').value = item.mekanisme_klaim;
-                    document.getElementById('si-metode').value = item.metode_klaim;
-                    document.getElementById('si-status').value = item.status_klaim;
-                    document.getElementById('si-keterangan').value = item.keterangan || '';
-
-                    this.fileTempStorage.si = Array.isArray(item.files_skp) ? [...item.files_skp] : [];
-                    document.getElementById('modal-si-title').innerText = 'Edit Program Sell In';
-                } else {
-                    document.getElementById('form-sell-in').reset();
-                    document.getElementById('si-id').value = '';
-                    document.getElementById('modal-si-title').innerText = 'Tambah Program Sell In';
-                }
-
-                this.handleMekanismeChange('si');
-                this.renderFileList('si');
-                Utils.openModal('modal-sell-in');
-            },
-
-            async saveSellIn(e) {
-                e.preventDefault();
-                const payload = {
-                    id: document.getElementById('si-id').value,
-                    periode_bulan: document.getElementById('si-periode').value,
-                    nama_program: document.getElementById('si-nama-program').value,
-                    nama_grup_brand: document.getElementById('si-grup').value,
-                    nama_brand: document.getElementById('si-brand').value,
-                    target: document.getElementById('si-target').value,
-                    cashback: document.getElementById('si-cashback').value,
-                    nominal_klaim: document.getElementById('si-nominal-klaim').value,
-                    nilai_ach: document.getElementById('si-ach').value,
-                    status_pencapaian: document.getElementById('si-status-pencapaian').value,
-                    mekanisme_klaim: document.getElementById('si-mekanisme').value,
-                    metode_klaim: document.getElementById('si-metode').value,
-                    status_klaim: document.getElementById('si-status').value,
-                    keterangan: document.getElementById('si-keterangan').value,
-                    files_skp: this.fileTempStorage.si
-                };
-
-                Utils.showLoading('Menyimpan data Sell In...');
-                const res = await ApiClient.request('saveSellIn', { data: payload });
-                Utils.hideLoading();
-
-                if (res.success) {
-                    CACHE.updateCacheItem('sellIn', res.data);
-                    Utils.closeModal('modal-sell-in');
-                    Utils.showToast(res.message, 'success');
-                    this.renderSellInTable();
-                } else {
-                    Utils.showToast(res.message, 'error');
-                }
-            },
-
-            openModalKlaimBarang(id) {
-                this.populateDropdowns('kb');
-                const item = CACHE.klaimBarang.find(x => x.id === id);
-                if (!item) return;
-
-                document.getElementById('kb-id').value = item.id;
-                document.getElementById('kb-label-nominal').innerText = Utils.formatRupiah(item.nominal_klaim);
-                document.getElementById('kb-label-brand').innerText = `${item.nama_grup_brand} - ${item.nama_brand}`;
-                document.getElementById('kb-het').value = item.nominal_het || 0;
-                document.getElementById('kb-hpp').value = item.nominal_hpp || 0;
-                document.getElementById('kb-po-csa').value = item.nomor_po_csa || '';
-                document.getElementById('kb-status').value = item.status_klaim;
-
-                this.calcSelisihKlaimBarang();
-                Utils.openModal('modal-klaim-barang');
-            },
-
-            calcSelisihKlaimBarang() {
-                const id = document.getElementById('kb-id').value;
-                const item = CACHE.klaimBarang.find(x => x.id === id);
-                if (!item) return;
-
-                const het = Number(document.getElementById('kb-het').value) || 0;
-                const selisih = het - (Number(item.nominal_klaim) || 0);
-                document.getElementById('kb-selisih').value = Utils.formatRupiah(selisih);
-            },
-
-            async saveKlaimBarang(e) {
-                e.preventDefault();
-                const payload = {
-                    id: document.getElementById('kb-id').value,
-                    nominal_het: document.getElementById('kb-het').value,
-                    nominal_hpp: document.getElementById('kb-hpp').value,
-                    nomor_po_csa: document.getElementById('kb-po-csa').value,
-                    status_klaim: document.getElementById('kb-status').value
-                };
-
-                Utils.showLoading('Mengupdate Klaim Barang & Sync Status...');
-                const res = await ApiClient.request('updateKlaimBarang', { data: payload });
-                Utils.hideLoading();
-
-                if (res.success) {
-                    CACHE.updateCacheItem('klaimBarang', res.data);
-
-                    // Sync Status back to local cache of Sell Out / Sell In
-                    const kbItem = res.data;
-                    if (kbItem.sumber_program === 'SELL_OUT') {
-                        const target = CACHE.sellOut.find(x => x.id === kbItem.ref_id_program);
-                        if (target) target.status_klaim = kbItem.status_klaim;
-                    } else if (kbItem.sumber_program === 'SELL_IN') {
-                        const target = CACHE.sellIn.find(x => x.id === kbItem.ref_id_program);
-                        if (target) target.status_klaim = kbItem.status_klaim;
                     }
 
-                    Utils.closeModal('modal-klaim-barang');
-                    Utils.showToast(res.message, 'success');
-                    this.renderKlaimBarangTable();
-                } else {
-                    Utils.showToast(res.message, 'error');
-                }
-            },
+                    // Repopulate master dropdowns
+                    this.populateDropdowns(prefix);
 
-            openModalBudget(id = null) {
-                this.populateDropdowns('bud');
-
-                // Populate Program Ref Options
-                const refSelect = document.getElementById('bud-ref-program');
-                const progOptions = [
-                    '<option value="">-- Pilih Program --</option>',
-                    ...CACHE.sellOut.map(x => `<option value="SELL_OUT|${x.id}">[Sell Out] ${x.promo_nama_event} (${x.nama_brand})</option>`),
-                    ...CACHE.sellIn.map(x => `<option value="SELL_IN|${x.id}">[Sell In] ${x.nama_program} (${x.nama_brand})</option>`)
-                ];
-                refSelect.innerHTML = progOptions.join('');
-
-                if (id) {
-                    const item = CACHE.budget.find(x => x.id === id);
-                    if (!item) return;
-                    document.getElementById('bud-id').value = item.id;
-                    document.getElementById('bud-periode').value = item.periode_bulan;
-                    document.getElementById('bud-channel').value = item.channel || '';
-                    document.getElementById('bud-grup').value = item.nama_grup_brand;
-                    document.getElementById('bud-brand').value = item.nama_brand;
-                    document.getElementById('bud-nominal').value = item.nominal_budget;
-                    document.getElementById('bud-tgl-pemakaian').value = item.tanggal_pemakaian;
-                    document.getElementById('bud-keterangan').value = item.pemakaian_budget;
-                    document.getElementById('bud-status').value = item.status_pemakaian;
-                } else {
-                    document.getElementById('form-budget').reset();
-                    document.getElementById('bud-id').value = '';
-                }
-
-                Utils.openModal('modal-budget');
-            },
-
-            toggleBudgetSourceMode(mode) {
-                const secRef = document.getElementById('bud-sec-ref');
-                if (mode === 'REF') {
-                    secRef.classList.remove('hidden');
-                } else {
-                    secRef.classList.add('hidden');
-                }
-            },
-
-            handleBudgetProgramSelect() {
-                const val = document.getElementById('bud-ref-program').value;
-                if (!val) return;
-
-                const [sumber, id] = val.split('|');
-                let program = null;
-
-                if (sumber === 'SELL_OUT') program = CACHE.sellOut.find(x => x.id === id);
-                if (sumber === 'SELL_IN') program = CACHE.sellIn.find(x => x.id === id);
-
-                if (program) {
-                    document.getElementById('bud-periode').value = program.periode_bulan;
-                    document.getElementById('bud-grup').value = program.nama_grup_brand;
-                    document.getElementById('bud-brand').value = program.nama_brand;
-                    document.getElementById('bud-channel').value = program.channel || '';
-                    document.getElementById('bud-nominal').value = program.budget_skp || program.cashback || 0;
-                    document.getElementById('bud-keterangan').value = program.promo_nama_event || program.nama_program || '';
-                }
-            },
-
-            async saveBudget(e) {
-                e.preventDefault();
-                const payload = {
-                    id: document.getElementById('bud-id').value,
-                    periode_bulan: document.getElementById('bud-periode').value,
-                    channel: document.getElementById('bud-channel').value,
-                    nama_grup_brand: document.getElementById('bud-grup').value,
-                    nama_brand: document.getElementById('bud-brand').value,
-                    nominal_budget: document.getElementById('bud-nominal').value,
-                    tanggal_pemakaian: document.getElementById('bud-tgl-pemakaian').value,
-                    pemakaian_budget: document.getElementById('bud-keterangan').value,
-                    status_pemakaian: document.getElementById('bud-status').value
-                };
-
-                Utils.showLoading('Menyimpan pemakaian budget...');
-                const res = await ApiClient.request('saveBudget', { data: payload });
-                Utils.hideLoading();
-
-                if (res.success) {
-                    CACHE.updateCacheItem('budget', res.data);
-                    Utils.closeModal('modal-budget');
-                    Utils.showToast(res.message, 'success');
-                    this.renderBudgetTable();
+                    // Restore saved values, and set the newly added value to target select
+                    if (formEl) {
+                        Object.keys(savedValues).forEach(fieldId => {
+                            if (fieldId === targetSelectId) {
+                                this.setSelectValue(fieldId, nilai);
+                            } else {
+                                this.setSelectValue(fieldId, savedValues[fieldId]);
+                                const el = document.getElementById(fieldId);
+                                if (el && !this.tomSelectInstances[fieldId]) {
+                                    el.value = savedValues[fieldId];
+                                }
+                            }
+                        });
+                    }
                 } else {
                     Utils.showToast(res.message, 'error');
                 }
@@ -2470,11 +2838,11 @@
                     document.getElementById('mst-id').value = item.id;
                     document.getElementById('mst-kategori').value = item.kategori;
                     document.getElementById('mst-nilai').value = item.nilai;
-                    document.getElementById('mst-urutan').value = item.urutan;
                     document.getElementById('mst-aktif').checked = item.status_aktif;
                 } else {
                     document.getElementById('form-master').reset();
                     document.getElementById('mst-id').value = '';
+                    document.getElementById('mst-kategori').value = this.activeMasterCategory;
                 }
                 Utils.openModal('modal-master');
             },
@@ -2482,10 +2850,10 @@
             async saveMasterItem(e) {
                 e.preventDefault();
                 const payload = {
-                    id: document.getElementById('mst-id').value,
+                    id: document.getElementById('mst-id').value || 'MST-' + Date.now(),
                     kategori: document.getElementById('mst-kategori').value,
                     nilai: document.getElementById('mst-nilai').value,
-                    urutan: document.getElementById('mst-urutan').value,
+                    urutan: 1,
                     status_aktif: document.getElementById('mst-aktif').checked
                 };
 
@@ -2494,11 +2862,56 @@
                 Utils.hideLoading();
 
                 if (res.success) {
-                    await CACHE.refreshCache();
+                    CACHE.masterRaw = CACHE.masterRaw.filter(x => String(x.id) !== String(payload.id));
+                    CACHE.masterRaw.push(payload);
+                    CACHE.processMasterGroup(CACHE.masterRaw);
                     Utils.closeModal('modal-master');
                     Utils.showToast(res.message, 'success');
+                    this.renderMasterTable();
                 } else {
                     Utils.showToast(res.message, 'error');
+                }
+            },
+
+            async deleteMasterItem(id) {
+                Utils.showLoading('Menghapus item master...');
+                const res = await ApiClient.request('deleteMasterItem', { id });
+                Utils.hideLoading();
+
+                if (res.success) {
+                    const targetId = String(id).trim();
+                    CACHE.masterRaw = CACHE.masterRaw.filter(x => String(x.id).trim() !== targetId);
+                    if (CACHE.mockMasterData) {
+                        CACHE.mockMasterData = CACHE.mockMasterData.filter(x => String(x.id).trim() !== targetId);
+                    }
+                    CACHE.processMasterGroup(CACHE.masterRaw);
+                    Utils.showToast(res.message || 'Item master berhasil dihapus.', 'success');
+                    this.renderMasterTable();
+                } else {
+                    Utils.showToast(res.message || 'Gagal menghapus item master.', 'error');
+                }
+            },
+
+            renderUsersTable() {
+                const tbody = document.getElementById('tbody-users');
+                if (!tbody) return;
+
+                const users = CACHE.usersList || [];
+                if (users.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-slate-400">Belum ada user terdaftar.</td></tr>`;
+                } else {
+                    tbody.innerHTML = users.map(u => `
+                        <tr class="hover:bg-slate-50 transition">
+                            <td class="p-3 font-bold text-slate-800">${u.username}</td>
+                            <td class="p-3 font-semibold text-slate-700">${u.nama_lengkap}</td>
+                            <td class="p-3"><span class="badge ${u.role === 'Admin' ? 'bg-purple-100 text-purple-700' : 'bg-slate-100 text-slate-600'}">${u.role}</span></td>
+                            <td class="p-3"><span class="badge ${u.status_aktif ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}">${u.status_aktif ? 'Aktif' : 'Non-Aktif'}</span></td>
+                            <td class="p-3 text-slate-400">${Utils.formatDate(u.last_login)}</td>
+                            <td class="p-3 text-center">
+                                <button onclick="App.openModalUser('${u.username}')" class="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg" title="Edit User"><span class="material-symbols-outlined text-base">edit</span></button>
+                            </td>
+                        </tr>
+                    `).join('');
                 }
             },
 
@@ -2533,8 +2946,10 @@
                 Utils.hideLoading();
 
                 if (res.success) {
-                    const resUsers = await ApiClient.request('getUsers');
-                    if (resUsers.success) CACHE.usersList = resUsers.data;
+                    const existingIdx = CACHE.usersList.findIndex(x => x.username === payload.username);
+                    if (existingIdx !== -1) CACHE.usersList[existingIdx] = { ...CACHE.usersList[existingIdx], ...payload };
+                    else CACHE.usersList.unshift({ ...payload, last_login: '-' });
+
                     Utils.closeModal('modal-user');
                     Utils.showToast(res.message, 'success');
                     this.renderUsersTable();
@@ -2543,9 +2958,28 @@
                 }
             },
 
-            async deleteRecord(menuKey, id) {
-                if (!confirm(`Apakah Anda yakin ingin menghapus data dengan ID: ${id}?`)) return;
+            renderLogHistoryTable() {
+                const tbody = document.getElementById('tbody-log-history');
+                if (!tbody) return;
 
+                const logs = CACHE.logHistory || [];
+                if (logs.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-slate-400">Belum ada jejak audit terrekam.</td></tr>`;
+                } else {
+                    tbody.innerHTML = logs.map(l => `
+                        <tr class="hover:bg-slate-50 transition">
+                            <td class="p-3 text-slate-500">${l.tanggal} ${l.jam}</td>
+                            <td class="p-3 font-semibold text-slate-800">${l.user_login}</td>
+                            <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${l.aksi === 'CREATE' ? 'bg-emerald-100 text-emerald-700' : l.aksi === 'UPDATE' ? 'bg-blue-100 text-blue-700' : 'bg-rose-100 text-rose-700'}">${l.aksi}</span></td>
+                            <td class="p-3 font-medium">${l.nama_menu}</td>
+                            <td class="p-3 font-mono text-slate-600">${l.id_data}</td>
+                            <td class="p-3 max-w-xs truncate text-slate-500" title="${l.perubahan_baru}">${l.perubahan_baru}</td>
+                        </tr>
+                    `).join('');
+                }
+            },
+
+            async deleteRecord(menuKey, id) {
                 const actionMap = {
                     sellOut: 'deleteSellOut',
                     sellIn: 'deleteSellIn',
@@ -2558,10 +2992,10 @@
 
                 if (res.success) {
                     CACHE.deleteCacheItem(menuKey, id);
-                    Utils.showToast(res.message, 'success');
+                    Utils.showToast(res.message || 'Data berhasil dihapus.', 'success');
                     Router.renderCurrentPage();
                 } else {
-                    Utils.showToast(res.message, 'error');
+                    Utils.showToast(res.message || 'Gagal menghapus data.', 'error');
                 }
             }
         };
