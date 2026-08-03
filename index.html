@@ -124,7 +124,6 @@
             box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2) !important;
             background-color: #FFFFFF !important;
         }
-        /* Floating Dropdown overlay without pushing other fields */
         .ts-dropdown {
             position: absolute !important;
             top: 100% !important;
@@ -301,7 +300,7 @@
                 </button>
                 <span class="text-xs text-slate-400 hidden sm:inline">|</span>
                 <span id="current-date-badge" class="text-xs font-medium text-slate-500 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200">
-                    02 Aug 2026
+                    03 Aug 2026
                 </span>
             </div>
         </header>
@@ -437,6 +436,7 @@
                         <table id="table-sell-out" class="w-full text-left text-xs">
                             <thead class="bg-slate-50 text-slate-600 font-semibold uppercase tracking-wider border-b border-slate-200">
                                 <tr>
+                                    <th class="p-3 w-12 text-center">No.</th>
                                     <th class="p-3">Periode Bulan</th>
                                     <th class="p-3">Grup & Brand</th>
                                     <th class="p-3">Event / Promo</th>
@@ -500,6 +500,7 @@
                         <table id="table-sell-in" class="w-full text-left text-xs">
                             <thead class="bg-slate-50 text-slate-600 font-semibold uppercase tracking-wider border-b border-slate-200">
                                 <tr>
+                                    <th class="p-3 w-12 text-center">No.</th>
                                     <th class="p-3">Periode Bulan</th>
                                     <th class="p-3">Nama Program</th>
                                     <th class="p-3">Grup & Brand</th>
@@ -558,6 +559,7 @@
                         <table id="table-klaim-barang" class="w-full text-left text-xs">
                             <thead class="bg-slate-50 text-slate-600 font-semibold uppercase tracking-wider border-b border-slate-200">
                                 <tr>
+                                    <th class="p-3 w-12 text-center">No.</th>
                                     <th class="p-3">Sumber / Periode</th>
                                     <th class="p-3">Grup & Brand</th>
                                     <th class="p-3">Nominal Klaim</th>
@@ -612,6 +614,7 @@
                         <table id="table-budget" class="w-full text-left text-xs">
                             <thead class="bg-slate-50 text-slate-600 font-semibold uppercase tracking-wider border-b border-slate-200">
                                 <tr>
+                                    <th class="p-3 w-12 text-center">No.</th>
                                     <th class="p-3">Tanggal / Periode</th>
                                     <th class="p-3">Sumber Program</th>
                                     <th class="p-3">Grup & Brand</th>
@@ -655,6 +658,7 @@
                     <table class="w-full text-left text-xs">
                         <thead class="bg-slate-50 text-slate-600 font-semibold uppercase tracking-wider border-b border-slate-200">
                             <tr>
+                                <th class="p-3 w-12 text-center">No.</th>
                                 <th class="p-3">Kategori</th>
                                 <th class="p-3">Nilai Opsi Dropdown</th>
                                 <th class="p-3">Status Aktif</th>
@@ -682,6 +686,7 @@
                     <table class="w-full text-left text-xs">
                         <thead class="bg-slate-50 text-slate-600 font-semibold uppercase tracking-wider border-b border-slate-200">
                             <tr>
+                                <th class="p-3 w-12 text-center">No.</th>
                                 <th class="p-3">Username</th>
                                 <th class="p-3">Nama Lengkap</th>
                                 <th class="p-3">Role Access</th>
@@ -707,6 +712,7 @@
                         <table class="w-full text-left text-xs">
                             <thead class="bg-slate-50 text-slate-600 font-semibold uppercase tracking-wider border-b border-slate-200">
                                 <tr>
+                                    <th class="p-3 w-12 text-center">No.</th>
                                     <th class="p-3">Timestamp</th>
                                     <th class="p-3">User</th>
                                     <th class="p-3">Aksi</th>
@@ -1217,6 +1223,31 @@
                 }
             },
 
+            // Formatter for Indonesian month & year display (e.g., "Agustus 2026")
+            formatPeriodeBulan(val) {
+                if (!val) return '-';
+                try {
+                    let year, monthIdx;
+                    if (typeof val === 'string' && /^\d{4}-\d{2}$/.test(val.trim())) {
+                        const parts = val.trim().split('-');
+                        year = parseInt(parts[0], 10);
+                        monthIdx = parseInt(parts[1], 10) - 1;
+                    } else {
+                        const d = new Date(val);
+                        if (isNaN(d.getTime())) return val;
+                        year = d.getFullYear();
+                        monthIdx = d.getMonth();
+                    }
+                    const namaBulan = [
+                        'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+                        'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+                    ];
+                    return `${namaBulan[monthIdx] || ''} ${year}`;
+                } catch (e) {
+                    return val;
+                }
+            },
+
             // Formatter to standardize month strings into YYYY-MM for <input type="month">
             formatMonthValue(val) {
                 if (!val) return '';
@@ -1469,7 +1500,7 @@
                             resolve({
                                 success: true,
                                 data: [
-                                    { username: 'admin', nama_lengkap: 'Administrator System', role: 'Admin', status_aktif: true, last_login: '2026-08-02 18:00:00' },
+                                    { username: 'admin', nama_lengkap: 'Administrator System', role: 'Admin', status_aktif: true, last_login: '2026-08-03 08:00:00' },
                                     { username: 'user', nama_lengkap: 'User Operasional', role: 'User', status_aktif: true, last_login: '2026-08-01 10:00:00' }
                                 ]
                             });
@@ -1477,7 +1508,7 @@
                             resolve({
                                 success: true,
                                 data: [
-                                    { id: 'LOG-001', tanggal: '2026-08-02', jam: '18:05:00', user_login: 'admin', aksi: 'LOGIN', nama_menu: 'AUTHENTICATION', id_data: 'admin', perubahan_lama: '-', perubahan_baru: 'User logged in' }
+                                    { id: 'LOG-001', tanggal: '2026-08-03', jam: '08:05:00', user_login: 'admin', aksi: 'LOGIN', nama_menu: 'AUTHENTICATION', id_data: 'admin', perubahan_lama: '-', perubahan_baru: 'User logged in' }
                                 ]
                             });
                         } else if (action === 'saveMasterItem') {
@@ -1633,6 +1664,12 @@
 
                 this.updateNavActive(pageName);
                 this.renderCurrentPage();
+
+                // Auto-hide sidebar on mobile drawer after navigating to chosen page
+                const sidebar = document.getElementById('sidebar');
+                if (sidebar && window.innerWidth < 768) {
+                    sidebar.classList.add('-translate-x-full');
+                }
             },
 
             updateNavActive(pageName) {
@@ -1808,8 +1845,15 @@
                 return dataArray.filter(item => {
                     for (let fKey in filterObj) {
                         const targetVal = filterObj[fKey];
-                        if (targetVal && targetVal !== '') {
-                            if (item[fKey] !== targetVal) return false;
+                        if (targetVal !== undefined && targetVal !== null && String(targetVal).trim() !== '') {
+                            const itemVal = item[fKey];
+                            if (fKey === 'periode_bulan') {
+                                const itemMonth = Utils.formatMonthValue(itemVal);
+                                const filterMonth = Utils.formatMonthValue(targetVal);
+                                if (filterMonth && itemMonth !== filterMonth) return false;
+                            } else {
+                                if (String(itemVal || '').trim() !== String(targetVal).trim()) return false;
+                            }
                         }
                     }
 
@@ -1993,7 +2037,7 @@
                     this.chartBulan = new Chart(ctxBulan, {
                         type: 'line',
                         data: {
-                            labels: sortedMonths.length ? sortedMonths : ['2026-06', '2026-07', '2026-08'],
+                            labels: sortedMonths.length ? sortedMonths.map(m => Utils.formatPeriodeBulan(m)) : ['Juni 2026', 'Juli 2026', 'Agustus 2026'],
                             datasets: [{
                                 label: 'Klaim (Rp)',
                                 data: sortedMonths.length ? sortedMonths.map(k => monthMap[k]) : [8000000, 12000000, 17500000],
@@ -2025,12 +2069,13 @@
 
                 const tbody = document.getElementById('tbody-sell-out');
                 if (paginated.pageData.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="9" class="p-8 text-center text-slate-400">Tidak ada data program Sell Out.</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="10" class="p-8 text-center text-slate-400">Tidak ada data program Sell Out.</td></tr>`;
                 } else {
-                    tbody.innerHTML = paginated.pageData.map(r => `
+                    tbody.innerHTML = paginated.pageData.map((r, idx) => `
                         <tr class="hover:bg-slate-50 transition">
+                            <td class="p-3 text-center font-semibold text-slate-500">${paginated.startIdx + idx}</td>
                             <td class="p-3 font-bold text-slate-800">
-                                ${r.periode_bulan || '-'}
+                                ${Utils.formatPeriodeBulan(r.periode_bulan)}
                             </td>
                             <td class="p-3">
                                 <span class="font-semibold text-slate-700">${r.nama_brand}</span>
@@ -2148,12 +2193,13 @@
 
                 const tbody = document.getElementById('tbody-sell-in');
                 if (paginated.pageData.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="9" class="p-8 text-center text-slate-400">Tidak ada data program Sell In.</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="10" class="p-8 text-center text-slate-400">Tidak ada data program Sell In.</td></tr>`;
                 } else {
-                    tbody.innerHTML = paginated.pageData.map(r => `
+                    tbody.innerHTML = paginated.pageData.map((r, idx) => `
                         <tr class="hover:bg-slate-50 transition">
+                            <td class="p-3 text-center font-semibold text-slate-500">${paginated.startIdx + idx}</td>
                             <td class="p-3 font-bold text-slate-800">
-                                ${r.periode_bulan || '-'}
+                                ${Utils.formatPeriodeBulan(r.periode_bulan)}
                             </td>
                             <td class="p-3 font-semibold text-slate-800">${r.nama_program}</td>
                             <td class="p-3">
@@ -2284,13 +2330,14 @@
 
                 const tbody = document.getElementById('tbody-klaim-barang');
                 if (paginated.pageData.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="9" class="p-8 text-center text-slate-400">Tidak ada data klaim barang (Ganti Produk).</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="10" class="p-8 text-center text-slate-400">Tidak ada data klaim barang (Ganti Produk).</td></tr>`;
                 } else {
-                    tbody.innerHTML = paginated.pageData.map(r => `
+                    tbody.innerHTML = paginated.pageData.map((r, idx) => `
                         <tr class="hover:bg-slate-50 transition">
+                            <td class="p-3 text-center font-semibold text-slate-500">${paginated.startIdx + idx}</td>
                             <td class="p-3">
                                 <span class="font-bold text-slate-800">${r.sumber_program || '-'}</span>
-                                <div class="text-[10px] text-slate-400">Periode: ${r.periode_bulan || '-'}</div>
+                                <div class="text-[10px] text-slate-400">Periode: ${Utils.formatPeriodeBulan(r.periode_bulan)}</div>
                             </td>
                             <td class="p-3">
                                 <span class="font-semibold text-slate-700">${r.nama_brand}</span>
@@ -2381,13 +2428,14 @@
 
                 const tbody = document.getElementById('tbody-budget');
                 if (paginated.pageData.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="8" class="p-8 text-center text-slate-400">Tidak ada data pemakaian budget.</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="9" class="p-8 text-center text-slate-400">Tidak ada data pemakaian budget.</td></tr>`;
                 } else {
-                    tbody.innerHTML = paginated.pageData.map(r => `
+                    tbody.innerHTML = paginated.pageData.map((r, idx) => `
                         <tr class="hover:bg-slate-50 transition">
+                            <td class="p-3 text-center font-semibold text-slate-500">${paginated.startIdx + idx}</td>
                             <td class="p-3">
                                 <span class="font-bold text-slate-800">${Utils.formatDate(r.tanggal_pemakaian)}</span>
-                                <div class="text-[10px] text-slate-400">Periode: ${r.periode_bulan || '-'}</div>
+                                <div class="text-[10px] text-slate-400">Periode: ${Utils.formatPeriodeBulan(r.periode_bulan)}</div>
                             </td>
                             <td class="p-3"><span class="px-2 py-0.5 bg-slate-100 rounded text-[10px] font-semibold">${r.sumber_program} (${r.ref_id_program || 'Manual'})</span></td>
                             <td class="p-3">
@@ -2621,10 +2669,11 @@
                 if (!tbody) return;
 
                 if (items.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-slate-400">Belum ada item master untuk kategori ini.</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-slate-400">Belum ada item master untuk kategori ini.</td></tr>`;
                 } else {
-                    tbody.innerHTML = items.map(m => `
+                    tbody.innerHTML = items.map((m, idx) => `
                         <tr class="hover:bg-slate-50 transition">
+                            <td class="p-3 text-center font-semibold text-slate-500">${idx + 1}</td>
                             <td class="p-3 font-semibold text-slate-700">${m.kategori}</td>
                             <td class="p-3 font-bold text-slate-800">${m.nilai}</td>
                             <td class="p-3"><span class="badge ${m.status_aktif ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'}">${m.status_aktif ? 'Aktif' : 'Non-Aktif'}</span></td>
@@ -2687,8 +2736,15 @@
                         });
                         this.tomSelectInstances[elemId] = ts;
                     } else {
+                        // Event listener for filter & status select controls
                         el.onchange = (e) => {
-                            if (e.target.value === '__ADD_NEW__') {
+                            if (elemId.startsWith('filter-')) {
+                                const filterModule = elemId.startsWith('filter-so') ? 'sellOut' :
+                                                     elemId.startsWith('filter-si') ? 'sellIn' :
+                                                     elemId.startsWith('filter-kb') ? 'klaimBarang' :
+                                                     elemId.startsWith('filter-bud') ? 'budget' : '';
+                                if (filterModule) App.applyFilters(filterModule);
+                            } else if (e.target.value === '__ADD_NEW__') {
                                 el.value = curVal || '';
                                 this.openQuickAddMaster(categoryKey, elemId);
                             } else if (elemId.endsWith('-mekanisme')) {
@@ -2762,7 +2818,7 @@
                 document.getElementById('quick-add-target-select-id').value = targetSelectId;
                 document.getElementById('quick-add-nilai').value = '';
                 document.getElementById('quick-add-title').innerText = `Tambah Master Baru`;
-                document.getElementById('quick-add-label-category').innerText = `Ospi Baru (${catLabels[kategoriKey] || kategoriKey}) *`;
+                document.getElementById('quick-add-label-category').innerText = `Opsi Baru (${catLabels[kategoriKey] || kategoriKey}) *`;
 
                 Utils.openModal('modal-quick-add-master');
             },
@@ -2799,7 +2855,6 @@
 
                     const prefix = targetSelectId.split('-')[0];
 
-                    // Preserve all current form input values so nothing gets cleared/reset
                     const formId = prefix === 'so' ? 'form-sell-out' : (prefix === 'si' ? 'form-sell-in' : (prefix === 'bud' ? 'form-budget' : ''));
                     const formEl = formId ? document.getElementById(formId) : null;
                     const savedValues = {};
@@ -2809,10 +2864,8 @@
                         });
                     }
 
-                    // Repopulate master dropdowns
                     this.populateDropdowns(prefix);
 
-                    // Restore saved values, and set the newly added value to target select
                     if (formEl) {
                         Object.keys(savedValues).forEach(fieldId => {
                             if (fieldId === targetSelectId) {
@@ -2898,10 +2951,11 @@
 
                 const users = CACHE.usersList || [];
                 if (users.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-slate-400">Belum ada user terdaftar.</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-slate-400">Belum ada user terdaftar.</td></tr>`;
                 } else {
-                    tbody.innerHTML = users.map(u => `
+                    tbody.innerHTML = users.map((u, idx) => `
                         <tr class="hover:bg-slate-50 transition">
+                            <td class="p-3 text-center font-semibold text-slate-500">${idx + 1}</td>
                             <td class="p-3 font-bold text-slate-800">${u.username}</td>
                             <td class="p-3 font-semibold text-slate-700">${u.nama_lengkap}</td>
                             <td class="p-3"><span class="badge ${u.role === 'Admin' ? 'bg-purple-100 text-purple-700' : 'bg-slate-100 text-slate-600'}">${u.role}</span></td>
@@ -2964,10 +3018,11 @@
 
                 const logs = CACHE.logHistory || [];
                 if (logs.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-slate-400">Belum ada jejak audit terrekam.</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-slate-400">Belum ada jejak audit terrekam.</td></tr>`;
                 } else {
-                    tbody.innerHTML = logs.map(l => `
+                    tbody.innerHTML = logs.map((l, idx) => `
                         <tr class="hover:bg-slate-50 transition">
+                            <td class="p-3 text-center font-semibold text-slate-500">${idx + 1}</td>
                             <td class="p-3 text-slate-500">${l.tanggal} ${l.jam}</td>
                             <td class="p-3 font-semibold text-slate-800">${l.user_login}</td>
                             <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${l.aksi === 'CREATE' ? 'bg-emerald-100 text-emerald-700' : l.aksi === 'UPDATE' ? 'bg-blue-100 text-blue-700' : 'bg-rose-100 text-rose-700'}">${l.aksi}</span></td>
