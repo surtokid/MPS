@@ -158,9 +158,15 @@
             color: #D50000 !important;
             font-weight: 600;
         }
+
+        /* Sidebar Overlay Backdrop on Desktop/Mobile when toggled */
+        .sidebar-overlay-backdrop {
+            background-color: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(2px);
+        }
     </style>
 </head>
-<body class="h-screen flex overflow-hidden">
+<body class="h-screen flex overflow-hidden relative">
 
     <!-- GLOBAL LOADING OVERLAY -->
     <div id="global-loading" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex flex-col items-center justify-center text-white hidden">
@@ -170,6 +176,9 @@
 
     <!-- TOAST NOTIFICATION CONTAINER -->
     <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-3 max-w-sm w-full pointer-events-none"></div>
+
+    <!-- SIDEBAR BACKDROP OVERLAY FOR ALL SCREENS WHEN DRAWER IS OPEN -->
+    <div id="sidebar-backdrop" class="fixed inset-0 z-20 sidebar-overlay-backdrop hidden" onclick="Router.toggleSidebar(false)"></div>
 
     <!-- LOGIN SCREEN OVERLAY -->
     <div id="login-screen" class="fixed inset-0 z-40 bg-slate-100 flex items-center justify-center p-4">
@@ -211,8 +220,8 @@
         </div>
     </div>
 
-    <!-- SIDEBAR NAVIGATION -->
-    <aside id="sidebar" class="w-64 bg-white border-r border-slate-200 flex flex-col z-20 transition-all duration-300 -translate-x-full md:translate-x-0 absolute md:relative h-full">
+    <!-- SIDEBAR NAVIGATION (Collapsible Drawer Mode on All Devices) -->
+    <aside id="sidebar" class="w-64 bg-white border-r border-slate-200 flex flex-col z-30 transition-all duration-300 -translate-x-full fixed h-full shadow-2xl">
         <div class="p-5 border-b border-slate-100 flex items-center justify-between">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 bg-[#D50000] text-white rounded-xl flex items-center justify-center font-bold text-lg shadow-md shadow-red-500/20">
@@ -223,7 +232,7 @@
                     <p class="text-[10px] text-slate-400 font-medium">Program Monitoring</p>
                 </div>
             </div>
-            <button class="md:hidden text-slate-400 hover:text-slate-600" onclick="Router.toggleSidebar()">
+            <button class="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-100 transition" onclick="Router.toggleSidebar(false)" title="Tutup Menu">
                 <span class="material-symbols-outlined">close</span>
             </button>
         </div>
@@ -283,34 +292,34 @@
     </aside>
 
     <!-- MAIN CONTENT WRAPPER -->
-    <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+    <div class="flex-1 flex flex-col min-w-0 overflow-hidden w-full">
         <!-- TOP NAVBAR -->
-        <header class="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between">
-            <div class="flex items-center gap-4">
-                <button class="md:hidden text-slate-600 hover:text-slate-900" onclick="Router.toggleSidebar()">
-                    <span class="material-symbols-outlined">menu</span>
+        <header class="bg-white border-b border-slate-200 px-4 md:px-6 py-3.5 flex items-center justify-between sticky top-0 z-10">
+            <div class="flex items-center gap-3 md:gap-4">
+                <button class="p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition" onclick="Router.toggleSidebar()" title="Buka Navigasi Menu">
+                    <span class="material-symbols-outlined text-2xl">menu</span>
                 </button>
-                <h1 id="page-title" class="text-xl font-bold text-slate-800">Dashboard Overview</h1>
+                <h1 id="page-title" class="text-base sm:text-xl font-bold text-slate-800 truncate">Dashboard Overview</h1>
             </div>
 
-            <div class="flex items-center gap-3">
-                <button onclick="CACHE.refreshCache()" class="flex items-center gap-2 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:text-[#D50000] bg-slate-100 hover:bg-red-50 rounded-lg transition" title="Sync / Refresh Data Server">
+            <div class="flex items-center gap-2 sm:gap-3">
+                <button onclick="CACHE.refreshCache()" class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:text-[#D50000] bg-slate-100 hover:bg-red-50 rounded-xl transition" title="Sync Data Server">
                     <span class="material-symbols-outlined text-base">sync</span>
                     <span class="hidden sm:inline">Sync Data</span>
                 </button>
-                <span class="text-xs text-slate-400 hidden sm:inline">|</span>
-                <span id="current-date-badge" class="text-xs font-medium text-slate-500 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200">
+                <span class="text-xs text-slate-300 hidden sm:inline">|</span>
+                <span id="current-date-badge" class="text-[11px] sm:text-xs font-medium text-slate-500 bg-slate-50 px-2.5 py-1.5 rounded-xl border border-slate-200 hidden xs:inline-block">
                     03 Aug 2026
                 </span>
             </div>
         </header>
 
         <!-- MAIN VIEW AREA -->
-        <main class="flex-1 overflow-y-auto p-6 space-y-6">
+        <main class="flex-1 overflow-y-auto p-3 sm:p-6 space-y-6">
 
             <!-- VIEW 1: DASHBOARD -->
             <section id="view-dashboard" class="page-view space-y-6 hidden">
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
                     <div class="card-modern p-5 border-l-4 border-l-blue-500">
                         <div class="flex items-center justify-between">
                             <div>
@@ -318,7 +327,7 @@
                                 <h3 id="dash-sellout-count" class="text-2xl font-bold text-slate-800 mt-1">0</h3>
                                 <p id="dash-sellout-total" class="text-xs font-semibold text-blue-600 mt-1">Rp 0</p>
                             </div>
-                            <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center">
+                            <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center flex-shrink-0">
                                 <span class="material-symbols-outlined">sell</span>
                             </div>
                         </div>
@@ -331,7 +340,7 @@
                                 <h3 id="dash-sellin-count" class="text-2xl font-bold text-slate-800 mt-1">0</h3>
                                 <p id="dash-sellin-total" class="text-xs font-semibold text-emerald-600 mt-1">Rp 0</p>
                             </div>
-                            <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center">
+                            <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center flex-shrink-0">
                                 <span class="material-symbols-outlined">inventory_2</span>
                             </div>
                         </div>
@@ -344,7 +353,7 @@
                                 <h3 id="dash-budget-total" class="text-2xl font-bold text-slate-800 mt-1">Rp 0</h3>
                                 <p id="dash-budget-count" class="text-xs font-medium text-slate-400 mt-1">0 Program</p>
                             </div>
-                            <div class="w-12 h-12 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center">
+                            <div class="w-12 h-12 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center flex-shrink-0">
                                 <span class="material-symbols-outlined">account_balance_wallet</span>
                             </div>
                         </div>
@@ -359,7 +368,7 @@
                                     <p class="text-xs text-amber-600 font-semibold">Pending: <span id="dash-klaim-pending">Rp 0</span></p>
                                 </div>
                             </div>
-                            <div class="w-12 h-12 bg-purple-50 text-purple-600 rounded-2xl flex items-center justify-center">
+                            <div class="w-12 h-12 bg-purple-50 text-purple-600 rounded-2xl flex items-center justify-center flex-shrink-0">
                                 <span class="material-symbols-outlined">pending_actions</span>
                             </div>
                         </div>
@@ -367,7 +376,7 @@
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div class="card-modern p-6">
+                    <div class="card-modern p-4 sm:p-6">
                         <h4 class="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2">
                             <span class="material-symbols-outlined text-red-600">bar_chart</span>
                             Budget vs Realisasi Klaim per Brand
@@ -377,7 +386,7 @@
                         </div>
                     </div>
 
-                    <div class="card-modern p-6">
+                    <div class="card-modern p-4 sm:p-6">
                         <h4 class="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2">
                             <span class="material-symbols-outlined text-red-600">show_chart</span>
                             Trend Nominal Klaim per Bulan
@@ -391,48 +400,70 @@
 
             <!-- VIEW 2: PROGRAM SELL OUT -->
             <section id="view-sell-out" class="page-view space-y-5 hidden">
-                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div class="flex flex-wrap items-center gap-2 flex-1">
-                        <input type="month" id="filter-so-periode" onchange="App.applyFilters('sellOut')" class="px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium outline-none focus:ring-2 focus:ring-red-500">
-                        <select id="filter-so-grup" onchange="App.applyFilters('sellOut')" class="px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium outline-none focus:ring-2 focus:ring-red-500">
-                            <option value="">-- Semua Grup Brand --</option>
-                        </select>
-                        <select id="filter-so-brand" onchange="App.applyFilters('sellOut')" class="px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium outline-none focus:ring-2 focus:ring-red-500">
-                            <option value="">-- Semua Brand --</option>
-                        </select>
-                        <select id="filter-so-channel" onchange="App.applyFilters('sellOut')" class="px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium outline-none focus:ring-2 focus:ring-red-500">
-                            <option value="">-- Semua Channel --</option>
-                        </select>
-                        <select id="filter-so-status" onchange="App.applyFilters('sellOut')" class="px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium outline-none focus:ring-2 focus:ring-red-500">
-                            <option value="">-- Semua Status --</option>
-                        </select>
+                <!-- Action Controls & Uniform Grid Filters -->
+                <div class="card-modern p-4 space-y-4">
+                    <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+                        <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider">Filter Program Sell Out</h3>
+                        <div class="flex items-center gap-2 self-end sm:self-auto">
+                            <button onclick="Utils.exportToExcel('table-sell-out', 'Program_Sell_Out')" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1 transition">
+                                <span class="material-symbols-outlined text-base">download</span>
+                                <span class="hidden xs:inline">Excel</span>
+                            </button>
+                            <button onclick="Utils.printData('Daftar Program Sell Out', 'table-sell-out')" class="px-3 py-2 bg-slate-700 hover:bg-slate-800 text-white rounded-xl text-xs font-semibold flex items-center gap-1 transition">
+                                <span class="material-symbols-outlined text-base">print</span>
+                                <span class="hidden xs:inline">Print</span>
+                            </button>
+                            <button onclick="App.openModalSellOut()" class="px-3.5 py-2 bg-[#D50000] hover:bg-red-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-lg shadow-red-500/20 transition">
+                                <span class="material-symbols-outlined text-base">add</span>
+                                Tambah
+                            </button>
+                        </div>
                     </div>
 
-                    <div class="flex items-center gap-2">
-                        <button onclick="Utils.exportToExcel('table-sell-out', 'Program_Sell_Out')" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition">
-                            <span class="material-symbols-outlined text-base">download</span>
-                            Excel
-                        </button>
-                        <button onclick="Utils.printData('Daftar Program Sell Out', 'table-sell-out')" class="px-3 py-2 bg-slate-700 hover:bg-slate-800 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition">
-                            <span class="material-symbols-outlined text-base">print</span>
-                            Print
-                        </button>
-                        <button onclick="App.openModalSellOut()" class="px-4 py-2 bg-[#D50000] hover:bg-red-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-lg shadow-red-500/20 transition">
-                            <span class="material-symbols-outlined text-base">add</span>
-                            Tambah Sell Out
-                        </button>
+                    <!-- Uniform Responsive Filter Grid -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-500 mb-1">Periode Bulan</label>
+                            <input type="month" id="filter-so-periode" onchange="App.applyFilters('sellOut')" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium outline-none focus:ring-2 focus:ring-red-500">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-500 mb-1">Grup Brand</label>
+                            <select id="filter-so-grup" onchange="App.applyFilters('sellOut')" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium outline-none focus:ring-2 focus:ring-red-500">
+                                <option value="">-- Semua Grup Brand --</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-500 mb-1">Brand</label>
+                            <select id="filter-so-brand" onchange="App.applyFilters('sellOut')" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium outline-none focus:ring-2 focus:ring-red-500">
+                                <option value="">-- Semua Brand --</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-500 mb-1">Channel</label>
+                            <select id="filter-so-channel" onchange="App.applyFilters('sellOut')" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium outline-none focus:ring-2 focus:ring-red-500">
+                                <option value="">-- Semua Channel --</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-500 mb-1">Status Klaim</label>
+                            <select id="filter-so-status" onchange="App.applyFilters('sellOut')" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium outline-none focus:ring-2 focus:ring-red-500">
+                                <option value="">-- Semua Status --</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
 
+                <!-- Data Table & Mobile Cards Wrapper -->
                 <div class="card-modern overflow-hidden">
                     <div class="p-4 border-b border-slate-100 flex items-center justify-between gap-4">
-                        <div class="relative flex-1 max-w-xs">
+                        <div class="relative flex-1 max-w-sm">
                             <span class="material-symbols-outlined absolute left-3 top-2.5 text-slate-400 text-sm">search</span>
                             <input type="text" id="search-sell-out" oninput="App.applyFilters('sellOut')" placeholder="Cari Promo/SKP/Brand..." class="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-red-500">
                         </div>
                     </div>
 
-                    <div class="overflow-x-auto">
+                    <!-- DESKTOP TABLE VIEW -->
+                    <div class="hidden md:block overflow-x-auto">
                         <table id="table-sell-out" class="w-full text-left text-xs">
                             <thead class="bg-slate-50 text-slate-600 font-semibold uppercase tracking-wider border-b border-slate-200">
                                 <tr>
@@ -454,7 +485,12 @@
                         </table>
                     </div>
 
-                    <div class="p-4 border-t border-slate-100 flex items-center justify-between text-xs" id="pagination-sell-out">
+                    <!-- MOBILE CARDS LIST VIEW -->
+                    <div id="m-cards-sell-out" class="md:hidden p-3 space-y-3">
+                        <!-- Dynamic Mobile Cards -->
+                    </div>
+
+                    <div class="p-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs" id="pagination-sell-out">
                         <!-- Dynamic Pagination -->
                     </div>
                 </div>
@@ -462,41 +498,57 @@
 
             <!-- VIEW 3: PROGRAM SELL IN -->
             <section id="view-sell-in" class="page-view space-y-5 hidden">
-                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div class="flex flex-wrap items-center gap-2 flex-1">
-                        <input type="month" id="filter-si-periode" onchange="App.applyFilters('sellIn')" class="px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium outline-none focus:ring-2 focus:ring-red-500">
-                        <select id="filter-si-grup" onchange="App.applyFilters('sellIn')" class="px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium outline-none focus:ring-2 focus:ring-red-500">
-                            <option value="">-- Semua Grup Brand --</option>
-                        </select>
-                        <select id="filter-si-brand" onchange="App.applyFilters('sellIn')" class="px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium outline-none focus:ring-2 focus:ring-red-500">
-                            <option value="">-- Semua Brand --</option>
-                        </select>
-                        <select id="filter-si-status" onchange="App.applyFilters('sellIn')" class="px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium outline-none focus:ring-2 focus:ring-red-500">
-                            <option value="">-- Semua Status Klaim --</option>
-                        </select>
+                <div class="card-modern p-4 space-y-4">
+                    <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+                        <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider">Filter Program Sell In</h3>
+                        <div class="flex items-center gap-2 self-end sm:self-auto">
+                            <button onclick="Utils.exportToExcel('table-sell-in', 'Program_Sell_In')" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1 transition">
+                                <span class="material-symbols-outlined text-base">download</span>
+                                <span class="hidden xs:inline">Excel</span>
+                            </button>
+                            <button onclick="App.openModalSellIn()" class="px-3.5 py-2 bg-[#D50000] hover:bg-red-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-lg shadow-red-500/20 transition">
+                                <span class="material-symbols-outlined text-base">add</span>
+                                Tambah
+                            </button>
+                        </div>
                     </div>
 
-                    <div class="flex items-center gap-2">
-                        <button onclick="Utils.exportToExcel('table-sell-in', 'Program_Sell_In')" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition">
-                            <span class="material-symbols-outlined text-base">download</span>
-                            Excel
-                        </button>
-                        <button onclick="App.openModalSellIn()" class="px-4 py-2 bg-[#D50000] hover:bg-red-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-lg shadow-red-500/20 transition">
-                            <span class="material-symbols-outlined text-base">add</span>
-                            Tambah Sell In
-                        </button>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-500 mb-1">Periode Bulan</label>
+                            <input type="month" id="filter-si-periode" onchange="App.applyFilters('sellIn')" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium outline-none focus:ring-2 focus:ring-red-500">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-500 mb-1">Grup Brand</label>
+                            <select id="filter-si-grup" onchange="App.applyFilters('sellIn')" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium outline-none focus:ring-2 focus:ring-red-500">
+                                <option value="">-- Semua Grup Brand --</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-500 mb-1">Brand</label>
+                            <select id="filter-si-brand" onchange="App.applyFilters('sellIn')" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium outline-none focus:ring-2 focus:ring-red-500">
+                                <option value="">-- Semua Brand --</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-500 mb-1">Status Klaim</label>
+                            <select id="filter-si-status" onchange="App.applyFilters('sellIn')" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium outline-none focus:ring-2 focus:ring-red-500">
+                                <option value="">-- Semua Status Klaim --</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
 
                 <div class="card-modern overflow-hidden">
                     <div class="p-4 border-b border-slate-100 flex items-center justify-between gap-4">
-                        <div class="relative flex-1 max-w-xs">
+                        <div class="relative flex-1 max-w-sm">
                             <span class="material-symbols-outlined absolute left-3 top-2.5 text-slate-400 text-sm">search</span>
                             <input type="text" id="search-sell-in" oninput="App.applyFilters('sellIn')" placeholder="Cari Program/SKP/Brand..." class="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-red-500">
                         </div>
                     </div>
 
-                    <div class="overflow-x-auto">
+                    <!-- DESKTOP TABLE VIEW -->
+                    <div class="hidden md:block overflow-x-auto">
                         <table id="table-sell-in" class="w-full text-left text-xs">
                             <thead class="bg-slate-50 text-slate-600 font-semibold uppercase tracking-wider border-b border-slate-200">
                                 <tr>
@@ -518,7 +570,12 @@
                         </table>
                     </div>
 
-                    <div class="p-4 border-t border-slate-100 flex items-center justify-between text-xs" id="pagination-sell-in">
+                    <!-- MOBILE CARDS LIST VIEW -->
+                    <div id="m-cards-sell-in" class="md:hidden p-3 space-y-3">
+                        <!-- Dynamic Mobile Cards -->
+                    </div>
+
+                    <div class="p-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs" id="pagination-sell-in">
                         <!-- Dynamic Pagination -->
                     </div>
                 </div>
@@ -526,36 +583,51 @@
 
             <!-- VIEW 4: KLAIM BARANG -->
             <section id="view-klaim-barang" class="page-view space-y-5 hidden">
-                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div class="flex flex-wrap items-center gap-2 flex-1">
-                        <input type="month" id="filter-kb-periode" onchange="App.applyFilters('klaimBarang')" class="px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium outline-none focus:ring-2 focus:ring-red-500">
-                        <select id="filter-kb-grup" onchange="App.applyFilters('klaimBarang')" class="px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium outline-none focus:ring-2 focus:ring-red-500">
-                            <option value="">-- Semua Grup Brand --</option>
-                        </select>
-                        <select id="filter-kb-brand" onchange="App.applyFilters('klaimBarang')" class="px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium outline-none focus:ring-2 focus:ring-red-500">
-                            <option value="">-- Semua Brand --</option>
-                        </select>
-                        <select id="filter-kb-status" onchange="App.applyFilters('klaimBarang')" class="px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium outline-none focus:ring-2 focus:ring-red-500">
-                            <option value="">-- Semua Status Klaim --</option>
-                        </select>
+                <div class="card-modern p-4 space-y-4">
+                    <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+                        <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider">Filter Klaim Barang</h3>
+                        <button onclick="Utils.exportToExcel('table-klaim-barang', 'Klaim_Barang')" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition self-end sm:self-auto">
+                            <span class="material-symbols-outlined text-base">download</span>
+                            Export Excel
+                        </button>
                     </div>
 
-                    <button onclick="Utils.exportToExcel('table-klaim-barang', 'Klaim_Barang')" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition">
-                        <span class="material-symbols-outlined text-base">download</span>
-                        Export Excel
-                    </button>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-500 mb-1">Periode Bulan</label>
+                            <input type="month" id="filter-kb-periode" onchange="App.applyFilters('klaimBarang')" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium outline-none focus:ring-2 focus:ring-red-500">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-500 mb-1">Grup Brand</label>
+                            <select id="filter-kb-grup" onchange="App.applyFilters('klaimBarang')" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium outline-none focus:ring-2 focus:ring-red-500">
+                                <option value="">-- Semua Grup Brand --</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-500 mb-1">Brand</label>
+                            <select id="filter-kb-brand" onchange="App.applyFilters('klaimBarang')" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium outline-none focus:ring-2 focus:ring-red-500">
+                                <option value="">-- Semua Brand --</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-500 mb-1">Status Klaim</label>
+                            <select id="filter-kb-status" onchange="App.applyFilters('klaimBarang')" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium outline-none focus:ring-2 focus:ring-red-500">
+                                <option value="">-- Semua Status Klaim --</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="card-modern overflow-hidden">
                     <div class="p-4 border-b border-slate-100 flex items-center justify-between gap-4">
-                        <div class="relative flex-1 max-w-xs">
+                        <div class="relative flex-1 max-w-sm">
                             <span class="material-symbols-outlined absolute left-3 top-2.5 text-slate-400 text-sm">search</span>
                             <input type="text" id="search-klaim-barang" oninput="App.applyFilters('klaimBarang')" placeholder="Cari Klaim Barang..." class="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-red-500">
                         </div>
-                        <span class="text-xs text-slate-400 font-medium">Auto-synced from "Ganti Produk"</span>
                     </div>
 
-                    <div class="overflow-x-auto">
+                    <!-- DESKTOP TABLE VIEW -->
+                    <div class="hidden md:block overflow-x-auto">
                         <table id="table-klaim-barang" class="w-full text-left text-xs">
                             <thead class="bg-slate-50 text-slate-600 font-semibold uppercase tracking-wider border-b border-slate-200">
                                 <tr>
@@ -577,7 +649,12 @@
                         </table>
                     </div>
 
-                    <div class="p-4 border-t border-slate-100 flex items-center justify-between text-xs" id="pagination-klaim-barang">
+                    <!-- MOBILE CARDS LIST VIEW -->
+                    <div id="m-cards-klaim-barang" class="md:hidden p-3 space-y-3">
+                        <!-- Dynamic Mobile Cards -->
+                    </div>
+
+                    <div class="p-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs" id="pagination-klaim-barang">
                         <!-- Dynamic Pagination -->
                     </div>
                 </div>
@@ -585,32 +662,45 @@
 
             <!-- VIEW 5: PEMAKAIAN BUDGET -->
             <section id="view-budget" class="page-view space-y-5 hidden">
-                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div class="flex flex-wrap items-center gap-2 flex-1">
-                        <input type="month" id="filter-bud-periode" onchange="App.applyFilters('budget')" class="px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium outline-none focus:ring-2 focus:ring-red-500">
-                        <select id="filter-bud-grup" onchange="App.applyFilters('budget')" class="px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium outline-none focus:ring-2 focus:ring-red-500">
-                            <option value="">-- Semua Grup Brand --</option>
-                        </select>
-                        <select id="filter-bud-brand" onchange="App.applyFilters('budget')" class="px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium outline-none focus:ring-2 focus:ring-red-500">
-                            <option value="">-- Semua Brand --</option>
-                        </select>
+                <div class="card-modern p-4 space-y-4">
+                    <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+                        <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider">Filter Pemakaian Budget</h3>
+                        <button onclick="App.openModalBudget()" class="px-4 py-2 bg-[#D50000] hover:bg-red-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-lg shadow-red-500/20 transition self-end sm:self-auto">
+                            <span class="material-symbols-outlined text-base">add</span>
+                            Input Budget
+                        </button>
                     </div>
 
-                    <button onclick="App.openModalBudget()" class="px-4 py-2 bg-[#D50000] hover:bg-red-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-lg shadow-red-500/20 transition">
-                        <span class="material-symbols-outlined text-base">add</span>
-                        Input Pemakaian Budget
-                    </button>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-500 mb-1">Periode Bulan</label>
+                            <input type="month" id="filter-bud-periode" onchange="App.applyFilters('budget')" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium outline-none focus:ring-2 focus:ring-red-500">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-500 mb-1">Grup Brand</label>
+                            <select id="filter-bud-grup" onchange="App.applyFilters('budget')" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium outline-none focus:ring-2 focus:ring-red-500">
+                                <option value="">-- Semua Grup Brand --</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-500 mb-1">Brand</label>
+                            <select id="filter-bud-brand" onchange="App.applyFilters('budget')" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium outline-none focus:ring-2 focus:ring-red-500">
+                                <option value="">-- Semua Brand --</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="card-modern overflow-hidden">
                     <div class="p-4 border-b border-slate-100">
-                        <div class="relative max-w-xs">
+                        <div class="relative max-w-sm">
                             <span class="material-symbols-outlined absolute left-3 top-2.5 text-slate-400 text-sm">search</span>
                             <input type="text" id="search-budget" oninput="App.applyFilters('budget')" placeholder="Cari Rincian Budget..." class="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-red-500">
                         </div>
                     </div>
 
-                    <div class="overflow-x-auto">
+                    <!-- DESKTOP TABLE VIEW -->
+                    <div class="hidden md:block overflow-x-auto">
                         <table id="table-budget" class="w-full text-left text-xs">
                             <thead class="bg-slate-50 text-slate-600 font-semibold uppercase tracking-wider border-b border-slate-200">
                                 <tr>
@@ -631,7 +721,12 @@
                         </table>
                     </div>
 
-                    <div class="p-4 border-t border-slate-100 flex items-center justify-between text-xs" id="pagination-budget">
+                    <!-- MOBILE CARDS LIST VIEW -->
+                    <div id="m-cards-budget" class="md:hidden p-3 space-y-3">
+                        <!-- Dynamic Mobile Cards -->
+                    </div>
+
+                    <div class="p-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs" id="pagination-budget">
                         <!-- Dynamic Pagination -->
                     </div>
                 </div>
@@ -655,20 +750,22 @@
                 </div>
 
                 <div class="card-modern overflow-hidden">
-                    <table class="w-full text-left text-xs">
-                        <thead class="bg-slate-50 text-slate-600 font-semibold uppercase tracking-wider border-b border-slate-200">
-                            <tr>
-                                <th class="p-3 w-12 text-center">No.</th>
-                                <th class="p-3">Kategori</th>
-                                <th class="p-3">Nilai Opsi Dropdown</th>
-                                <th class="p-3">Status Aktif</th>
-                                <th class="p-3 text-center">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tbody-master" class="divide-y divide-slate-100 text-slate-700">
-                            <!-- Dynamic Render -->
-                        </tbody>
-                    </table>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-slate-50 text-slate-600 font-semibold uppercase tracking-wider border-b border-slate-200">
+                                <tr>
+                                    <th class="p-3 w-12 text-center">No.</th>
+                                    <th class="p-3">Kategori</th>
+                                    <th class="p-3">Nilai Opsi Dropdown</th>
+                                    <th class="p-3">Status Aktif</th>
+                                    <th class="p-3 text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody-master" class="divide-y divide-slate-100 text-slate-700">
+                                <!-- Dynamic Render -->
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </section>
 
@@ -683,22 +780,24 @@
                 </div>
 
                 <div class="card-modern overflow-hidden">
-                    <table class="w-full text-left text-xs">
-                        <thead class="bg-slate-50 text-slate-600 font-semibold uppercase tracking-wider border-b border-slate-200">
-                            <tr>
-                                <th class="p-3 w-12 text-center">No.</th>
-                                <th class="p-3">Username</th>
-                                <th class="p-3">Nama Lengkap</th>
-                                <th class="p-3">Role Access</th>
-                                <th class="p-3">Status Account</th>
-                                <th class="p-3">Last Login</th>
-                                <th class="p-3 text-center">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tbody-users" class="divide-y divide-slate-100 text-slate-700">
-                            <!-- Dynamic Render -->
-                        </tbody>
-                    </table>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-slate-50 text-slate-600 font-semibold uppercase tracking-wider border-b border-slate-200">
+                                <tr>
+                                    <th class="p-3 w-12 text-center">No.</th>
+                                    <th class="p-3">Username</th>
+                                    <th class="p-3">Nama Lengkap</th>
+                                    <th class="p-3">Role Access</th>
+                                    <th class="p-3">Status Account</th>
+                                    <th class="p-3">Last Login</th>
+                                    <th class="p-3 text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody-users" class="divide-y divide-slate-100 text-slate-700">
+                                <!-- Dynamic Render -->
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </section>
 
@@ -1223,7 +1322,6 @@
                 }
             },
 
-            // Formatter for Indonesian month & year display (e.g., "Agustus 2026")
             formatPeriodeBulan(val) {
                 if (!val) return '-';
                 try {
@@ -1248,7 +1346,6 @@
                 }
             },
 
-            // Formatter to standardize month strings into YYYY-MM for <input type="month">
             formatMonthValue(val) {
                 if (!val) return '';
                 if (typeof val === 'string') {
@@ -1267,7 +1364,6 @@
                 return '';
             },
 
-            // Formatter for Currency Input with Thousands Separator (e.g. 200.000)
             formatCurrencyInput(el) {
                 if (!el) return;
                 let val = el.value.replace(/[^0-9]/g, '');
@@ -1423,11 +1519,11 @@
                             if (resJson.success) return resJson;
                             return this.mockResponse(action, payload);
                         } catch (parseErr) {
-                            console.warn('GAS Non-JSON Response, falling back to mock mode for preview...');
+                            console.warn('GAS Non-JSON Response, falling back to mock mode...');
                             return this.mockResponse(action, payload);
                         }
                     } catch (err) {
-                        console.warn('API Call Error/Timeout/CORS, using Interactive Mock Mode:', err.message);
+                        console.warn('API Call Error/Timeout, using Interactive Mock Mode:', err.message);
                         return this.mockResponse(action, payload);
                     }
                 } else {
@@ -1665,11 +1761,8 @@
                 this.updateNavActive(pageName);
                 this.renderCurrentPage();
 
-                // Auto-hide sidebar on mobile drawer after navigating to chosen page
-                const sidebar = document.getElementById('sidebar');
-                if (sidebar && window.innerWidth < 768) {
-                    sidebar.classList.add('-translate-x-full');
-                }
+                // Auto-hide sidebar navigation on page selection
+                this.toggleSidebar(false);
             },
 
             updateNavActive(pageName) {
@@ -1729,9 +1822,21 @@
                 }
             },
 
-            toggleSidebar() {
+            toggleSidebar(show = null) {
                 const sidebar = document.getElementById('sidebar');
-                if (sidebar) sidebar.classList.toggle('-translate-x-full');
+                const backdrop = document.getElementById('sidebar-backdrop');
+                if (!sidebar) return;
+
+                const isCurrentlyOpen = !sidebar.classList.contains('-translate-x-full');
+                const shouldOpen = show !== null ? show : !isCurrentlyOpen;
+
+                if (shouldOpen) {
+                    sidebar.classList.remove('-translate-x-full');
+                    if (backdrop) backdrop.classList.remove('hidden');
+                } else {
+                    sidebar.classList.add('-translate-x-full');
+                    if (backdrop) backdrop.classList.add('hidden');
+                }
             }
         };
 
@@ -1898,12 +2003,12 @@
 
                 const { totalEntries, totalPages, currentPage, startIdx, endIdx } = paginatedResult;
 
-                let html = `<div>Menampilkan <b>${startIdx}</b> - <b>${endIdx}</b> dari <b>${totalEntries}</b> data</div>`;
-                html += `<div class="flex items-center gap-1">`;
+                let html = `<div class="text-slate-500 font-medium text-center sm:text-left">Menampilkan <b>${startIdx}</b> - <b>${endIdx}</b> dari <b>${totalEntries}</b> data</div>`;
+                html += `<div class="flex items-center justify-center gap-1">`;
 
                 html += `
                     <button onclick="DataTable.changePage('${pageKey}', ${currentPage - 1}, ${onPageChange})" 
-                            ${currentPage === 1 ? 'disabled class="px-2 py-1 bg-slate-100 text-slate-300 rounded cursor-not-allowed"' : 'class="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded"'}>
+                            ${currentPage === 1 ? 'disabled class="px-2 py-1 bg-slate-100 text-slate-300 rounded-lg cursor-not-allowed"' : 'class="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg"'}>
                         <span class="material-symbols-outlined text-sm">chevron_left</span>
                     </button>
                 `;
@@ -1912,7 +2017,7 @@
                     if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
                         html += `
                             <button onclick="DataTable.changePage('${pageKey}', ${i}, ${onPageChange})" 
-                                    class="px-3 py-1 text-xs rounded font-semibold ${i === currentPage ? 'bg-[#D50000] text-white' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'}">
+                                    class="px-3 py-1 text-xs rounded-lg font-semibold ${i === currentPage ? 'bg-[#D50000] text-white shadow-sm' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'}">
                                 ${i}
                             </button>
                         `;
@@ -1923,7 +2028,7 @@
 
                 html += `
                     <button onclick="DataTable.changePage('${pageKey}', ${currentPage + 1}, ${onPageChange})" 
-                            ${currentPage === totalPages || totalPages === 0 ? 'disabled class="px-2 py-1 bg-slate-100 text-slate-300 rounded cursor-not-allowed"' : 'class="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded"'}>
+                            ${currentPage === totalPages || totalPages === 0 ? 'disabled class="px-2 py-1 bg-slate-100 text-slate-300 rounded-lg cursor-not-allowed"' : 'class="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg"'}>
                         <span class="material-symbols-outlined text-sm">chevron_right</span>
                     </button>
                 `;
@@ -2068,15 +2173,17 @@
                 const paginated = DataTable.paginate(filtered, 'sellOut');
 
                 const tbody = document.getElementById('tbody-sell-out');
+                const mContainer = document.getElementById('m-cards-sell-out');
+
                 if (paginated.pageData.length === 0) {
                     tbody.innerHTML = `<tr><td colspan="10" class="p-8 text-center text-slate-400">Tidak ada data program Sell Out.</td></tr>`;
+                    mContainer.innerHTML = `<div class="p-6 text-center text-xs text-slate-400">Tidak ada data program Sell Out.</div>`;
                 } else {
+                    // Render Desktop Table Row
                     tbody.innerHTML = paginated.pageData.map((r, idx) => `
                         <tr class="hover:bg-slate-50 transition">
                             <td class="p-3 text-center font-semibold text-slate-500">${paginated.startIdx + idx}</td>
-                            <td class="p-3 font-bold text-slate-800">
-                                ${Utils.formatPeriodeBulan(r.periode_bulan)}
-                            </td>
+                            <td class="p-3 font-bold text-slate-800">${Utils.formatPeriodeBulan(r.periode_bulan)}</td>
                             <td class="p-3">
                                 <span class="font-semibold text-slate-700">${r.nama_brand}</span>
                                 <div class="text-[10px] text-slate-400">${r.nama_grup_brand}</div>
@@ -2095,6 +2202,41 @@
                                 <button onclick="App.deleteRecord('sellOut', '${r.id}')" class="p-1.5 text-red-600 hover:bg-red-50 rounded-lg" title="Hapus"><span class="material-symbols-outlined text-base">delete</span></button>
                             </td>
                         </tr>
+                    `).join('');
+
+                    // Render Mobile Cards View
+                    mContainer.innerHTML = paginated.pageData.map((r, idx) => `
+                        <div class="card-modern p-4 space-y-2 border-l-4 border-l-[#D50000]">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[10px] font-bold text-slate-400">#${paginated.startIdx + idx} • ${Utils.formatPeriodeBulan(r.periode_bulan)}</span>
+                                <span class="badge ${CONFIG.BADGE_COLORS[r.status_klaim] || 'bg-slate-100'}">${r.status_klaim}</span>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-slate-800 text-sm">${r.promo_nama_event}</h4>
+                                <p class="text-xs text-slate-500">${r.nama_brand} (${r.nama_grup_brand}) • ${r.channel}</p>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2 bg-slate-50 p-2.5 rounded-xl text-xs">
+                                <div>
+                                    <span class="block text-[10px] text-slate-400 font-semibold uppercase">Budget SKP</span>
+                                    <span class="font-semibold text-slate-700">${Utils.formatRupiah(r.budget_skp)}</span>
+                                </div>
+                                <div>
+                                    <span class="block text-[10px] text-slate-400 font-semibold uppercase">Nominal Klaim</span>
+                                    <span class="font-bold text-blue-600">${Utils.formatRupiah(r.nominal_klaim)}</span>
+                                </div>
+                            </div>
+                            <div class="pt-2 flex items-center justify-between border-t border-slate-100 text-xs">
+                                <span class="px-2 py-0.5 bg-slate-100 rounded text-[10px] font-semibold">${r.mekanisme_klaim}</span>
+                                <div class="flex items-center gap-1">
+                                    <button onclick="App.openModalSellOut('${r.id}')" class="px-2.5 py-1 bg-blue-50 text-blue-600 rounded-lg font-semibold flex items-center gap-1">
+                                        <span class="material-symbols-outlined text-sm">edit</span> Edit
+                                    </button>
+                                    <button onclick="App.deleteRecord('sellOut', '${r.id}')" class="p-1 text-red-600 hover:bg-red-50 rounded-lg">
+                                        <span class="material-symbols-outlined text-base">delete</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     `).join('');
                 }
 
@@ -2192,15 +2334,16 @@
                 const paginated = DataTable.paginate(filtered, 'sellIn');
 
                 const tbody = document.getElementById('tbody-sell-in');
+                const mContainer = document.getElementById('m-cards-sell-in');
+
                 if (paginated.pageData.length === 0) {
                     tbody.innerHTML = `<tr><td colspan="10" class="p-8 text-center text-slate-400">Tidak ada data program Sell In.</td></tr>`;
+                    mContainer.innerHTML = `<div class="p-6 text-center text-xs text-slate-400">Tidak ada data program Sell In.</div>`;
                 } else {
                     tbody.innerHTML = paginated.pageData.map((r, idx) => `
                         <tr class="hover:bg-slate-50 transition">
                             <td class="p-3 text-center font-semibold text-slate-500">${paginated.startIdx + idx}</td>
-                            <td class="p-3 font-bold text-slate-800">
-                                ${Utils.formatPeriodeBulan(r.periode_bulan)}
-                            </td>
+                            <td class="p-3 font-bold text-slate-800">${Utils.formatPeriodeBulan(r.periode_bulan)}</td>
                             <td class="p-3 font-semibold text-slate-800">${r.nama_program}</td>
                             <td class="p-3">
                                 <span class="font-semibold text-slate-700">${r.nama_brand}</span>
@@ -2218,6 +2361,40 @@
                                 <button onclick="App.deleteRecord('sellIn', '${r.id}')" class="p-1.5 text-red-600 hover:bg-red-50 rounded-lg" title="Hapus"><span class="material-symbols-outlined text-base">delete</span></button>
                             </td>
                         </tr>
+                    `).join('');
+
+                    mContainer.innerHTML = paginated.pageData.map((r, idx) => `
+                        <div class="card-modern p-4 space-y-2 border-l-4 border-l-emerald-500">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[10px] font-bold text-slate-400">#${paginated.startIdx + idx} • ${Utils.formatPeriodeBulan(r.periode_bulan)}</span>
+                                <span class="badge ${CONFIG.BADGE_COLORS[r.status_klaim] || 'bg-slate-100'}">${r.status_klaim}</span>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-slate-800 text-sm">${r.nama_program}</h4>
+                                <p class="text-xs text-slate-500">${r.nama_brand} (${r.nama_grup_brand})</p>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2 bg-slate-50 p-2.5 rounded-xl text-xs">
+                                <div>
+                                    <span class="block text-[10px] text-slate-400 font-semibold uppercase">Target / ACH</span>
+                                    <span class="font-semibold text-slate-700">${Utils.formatRupiah(r.target)} (${r.nilai_ach}%)</span>
+                                </div>
+                                <div>
+                                    <span class="block text-[10px] text-slate-400 font-semibold uppercase">Nominal Klaim</span>
+                                    <span class="font-bold text-emerald-600">${Utils.formatRupiah(r.nominal_klaim)}</span>
+                                </div>
+                            </div>
+                            <div class="pt-2 flex items-center justify-between border-t border-slate-100 text-xs">
+                                <span class="badge ${r.status_pencapaian === 'Tercapai' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}">${r.status_pencapaian}</span>
+                                <div class="flex items-center gap-1">
+                                    <button onclick="App.openModalSellIn('${r.id}')" class="px-2.5 py-1 bg-blue-50 text-blue-600 rounded-lg font-semibold flex items-center gap-1">
+                                        <span class="material-symbols-outlined text-sm">edit</span> Edit
+                                    </button>
+                                    <button onclick="App.deleteRecord('sellIn', '${r.id}')" class="p-1 text-red-600 hover:bg-red-50 rounded-lg">
+                                        <span class="material-symbols-outlined text-base">delete</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     `).join('');
                 }
 
@@ -2329,8 +2506,11 @@
                 const paginated = DataTable.paginate(filtered, 'klaimBarang');
 
                 const tbody = document.getElementById('tbody-klaim-barang');
+                const mContainer = document.getElementById('m-cards-klaim-barang');
+
                 if (paginated.pageData.length === 0) {
                     tbody.innerHTML = `<tr><td colspan="10" class="p-8 text-center text-slate-400">Tidak ada data klaim barang (Ganti Produk).</td></tr>`;
+                    mContainer.innerHTML = `<div class="p-6 text-center text-xs text-slate-400">Tidak ada data klaim barang.</div>`;
                 } else {
                     tbody.innerHTML = paginated.pageData.map((r, idx) => `
                         <tr class="hover:bg-slate-50 transition">
@@ -2355,6 +2535,35 @@
                                 </button>
                             </td>
                         </tr>
+                    `).join('');
+
+                    mContainer.innerHTML = paginated.pageData.map((r, idx) => `
+                        <div class="card-modern p-4 space-y-2 border-l-4 border-l-purple-500">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[10px] font-bold text-slate-400">#${paginated.startIdx + idx} • ${r.sumber_program || '-'}</span>
+                                <span class="badge ${CONFIG.BADGE_COLORS[r.status_klaim] || 'bg-slate-100'}">${r.status_klaim}</span>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-slate-800 text-sm">${r.nama_brand} (${r.nama_grup_brand})</h4>
+                                <p class="text-xs text-slate-500">PO CSA: ${r.nomor_po_csa || '-'} • Periode: ${Utils.formatPeriodeBulan(r.periode_bulan)}</p>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2 bg-slate-50 p-2.5 rounded-xl text-xs">
+                                <div>
+                                    <span class="block text-[10px] text-slate-400 font-semibold uppercase">Nominal Klaim</span>
+                                    <span class="font-bold text-blue-600">${Utils.formatRupiah(r.nominal_klaim)}</span>
+                                </div>
+                                <div>
+                                    <span class="block text-[10px] text-slate-400 font-semibold uppercase">Nominal HET</span>
+                                    <span class="font-semibold text-slate-700">${Utils.formatRupiah(r.nominal_het)}</span>
+                                </div>
+                            </div>
+                            <div class="pt-2 flex items-center justify-between border-t border-slate-100 text-xs">
+                                <span class="font-bold ${r.selisih < 0 ? 'text-red-600' : 'text-slate-700'}">Selisih: ${Utils.formatRupiah(r.selisih)}</span>
+                                <button onclick="App.openModalKlaimBarang('${r.id}')" class="px-2.5 py-1 bg-red-50 text-[#D50000] hover:bg-red-100 rounded-lg font-semibold flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-sm">edit</span> Update
+                                </button>
+                            </div>
+                        </div>
                     `).join('');
                 }
 
@@ -2427,8 +2636,11 @@
                 const paginated = DataTable.paginate(filtered, 'budget');
 
                 const tbody = document.getElementById('tbody-budget');
+                const mContainer = document.getElementById('m-cards-budget');
+
                 if (paginated.pageData.length === 0) {
                     tbody.innerHTML = `<tr><td colspan="9" class="p-8 text-center text-slate-400">Tidak ada data pemakaian budget.</td></tr>`;
+                    mContainer.innerHTML = `<div class="p-6 text-center text-xs text-slate-400">Tidak ada data pemakaian budget.</div>`;
                 } else {
                     tbody.innerHTML = paginated.pageData.map((r, idx) => `
                         <tr class="hover:bg-slate-50 transition">
@@ -2451,6 +2663,34 @@
                                 <button onclick="App.deleteRecord('budget', '${r.id}')" class="p-1.5 text-red-600 hover:bg-red-50 rounded-lg"><span class="material-symbols-outlined text-base">delete</span></button>
                             </td>
                         </tr>
+                    `).join('');
+
+                    mContainer.innerHTML = paginated.pageData.map((r, idx) => `
+                        <div class="card-modern p-4 space-y-2 border-l-4 border-l-amber-500">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[10px] font-bold text-slate-400">#${paginated.startIdx + idx} • ${Utils.formatDate(r.tanggal_pemakaian)}</span>
+                                <span class="badge ${CONFIG.BADGE_COLORS[r.status_pemakaian] || 'bg-slate-100'}">${r.status_pemakaian}</span>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-slate-800 text-sm">${r.pemakaian_budget}</h4>
+                                <p class="text-xs text-slate-500">${r.nama_brand} (${r.nama_grup_brand}) • ${r.channel || '-'}</p>
+                            </div>
+                            <div class="bg-slate-50 p-2.5 rounded-xl text-xs flex items-center justify-between">
+                                <span class="text-[10px] text-slate-400 font-semibold uppercase">Nominal Budget</span>
+                                <span class="font-bold text-amber-600 text-sm">${Utils.formatRupiah(r.nominal_budget)}</span>
+                            </div>
+                            <div class="pt-2 flex items-center justify-between border-t border-slate-100 text-xs">
+                                <span class="px-2 py-0.5 bg-slate-100 rounded text-[10px] font-semibold">${r.sumber_program}</span>
+                                <div class="flex items-center gap-1">
+                                    <button onclick="App.openModalBudget('${r.id}')" class="px-2.5 py-1 bg-blue-50 text-blue-600 rounded-lg font-semibold flex items-center gap-1">
+                                        <span class="material-symbols-outlined text-sm">edit</span> Edit
+                                    </button>
+                                    <button onclick="App.deleteRecord('budget', '${r.id}')" class="p-1 text-red-600 hover:bg-red-50 rounded-lg">
+                                        <span class="material-symbols-outlined text-base">delete</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     `).join('');
                 }
 
