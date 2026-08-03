@@ -1503,7 +1503,8 @@
                 if (CONFIG.API_URL && CONFIG.API_URL.trim() !== '') {
                     try {
                         const controller = new AbortController();
-                        const timeoutId = setTimeout(() => controller.abort(), 10000);
+                        // Increased timeout limit to 30 seconds for Google Apps Script cold starts
+                        const timeoutId = setTimeout(() => controller.abort(new Error('Request timeout')), 30000);
 
                         const response = await fetch(CONFIG.API_URL, {
                             method: 'POST',
@@ -1522,6 +1523,10 @@
                             return { success: false, message: 'Respon dari server GAS tidak valid.' };
                         }
                     } catch (err) {
+                        if (err.name === 'AbortError') {
+                            console.warn('API Request Timed Out (30s):', action);
+                            return { success: false, message: 'Koneksi ke server lambat (Timeout 30d). Silakan coba lagi.' };
+                        }
                         console.error('API Call Error:', err);
                         return { success: false, message: 'Gagal menghubungi server GAS API.' };
                     }
@@ -2956,6 +2961,10 @@
                 if (this.tomSelectInstances[elemId]) {
                     this.tomSelectInstances[elemId].setValue(val || '', true);
                 }
+                if (elemId.endsWith('-mekanisme')) {
+                    const pfx = elemId.split('-')[0];
+                    this.handleMekanismeChange(pfx);
+                }
             },
 
             openQuickAddMaster(kategoriKey, targetSelectId) {
@@ -2989,7 +2998,6 @@
                 if (!nilai) return;
 
                 const payload = {
-                    id: 'MST-' + Date.now(),
                     kategori: kategori,
                     nilai: nilai,
                     urutan: 1,
@@ -2997,45 +3005,60 @@
                 };
 
                 Utils.showLoading('Menambahkan item master baru...');
-                const res = await ApiClient.request('saveMasterItem', { data: payload });
-                Utils.hideLoading();
+                try {
+                    const res = await ApiClient.request('saveMasterItem', { data: payload });
+                    Utils.hideLoading();
 
-                if (res.success) {
-                    if (!CACHE.masterRaw) CACHE.masterRaw = [];
-                    CACHE.masterRaw.push(payload);
-                    CACHE.processMasterGroup(CACHE.masterRaw);
+                    if (res && res.success) {
+                        // 1. Update cache lokal secara instan (0ms delay)
+                        const newItem = res.data || { id: 'MST-' + Date.now(), ...payload };
+                        if (!CACHE.masterRaw) CACHE.masterRaw = [];
+                        const exists = CACHE.masterRaw.some(x => x.kategori === kategori && x.nilai === nilai);
+                        if (!exists) {
+                            CACHE.masterRaw.push(newItem);
+                        }
+                        CACHE.processMasterGroup(CACHE.masterRaw);
 
-                    Utils.closeModal('modal-quick-add-master');
-                    Utils.showToast(`Item "${nilai}" berhasil ditambahkan!`, 'success');
+                        // 2. Tutup modal quick add
+                        Utils.closeModal('modal-quick-add-master');
+                        Utils.showToast(`Item "${nilai}" berhasil ditambahkan!`, 'success');
 
-                    const prefix = targetSelectId.split('-')[0];
+                        // 3. Simpan nilai form aktif agar tidak hilang
+                        const prefix = targetSelectId.split('-')[0];
+                        const formId = prefix === 'so' ? 'form-sell-out' : (prefix === 'si' ? 'form-sell-in' : (prefix === 'bud' ? 'form-budget' : ''));
+                        const formEl = formId ? document.getElementById(formId) : null;
+                        const savedValues = {};
+                        if (formEl) {
+                            formEl.querySelectorAll('input, select, textarea').forEach(field => {
+                                if (field.id) savedValues[field.id] = field.value;
+                            });
+                        }
 
-                    const formId = prefix === 'so' ? 'form-sell-out' : (prefix === 'si' ? 'form-sell-in' : (prefix === 'bud' ? 'form-budget' : ''));
-                    const formEl = formId ? document.getElementById(formId) : null;
-                    const savedValues = {};
-                    if (formEl) {
-                        formEl.querySelectorAll('input, select, textarea').forEach(field => {
-                            if (field.id) savedValues[field.id] = field.value;
-                        });
-                    }
+                        // 4. Inisialisasi ulang dropdown form aktif dengan data master terbaru
+                        this.populateDropdowns(prefix);
 
-                    this.populateDropdowns(prefix);
-
-                    if (formEl) {
-                        Object.keys(savedValues).forEach(fieldId => {
-                            if (fieldId === targetSelectId) {
-                                this.setSelectValue(fieldId, nilai);
-                            } else {
-                                this.setSelectValue(fieldId, savedValues[fieldId]);
-                                const el = document.getElementById(fieldId);
-                                if (el && !this.tomSelectInstances[fieldId]) {
-                                    el.value = savedValues[fieldId];
+                        // 5. Kembalikan isian form & set nilai pilihan baru
+                        if (formEl) {
+                            Object.keys(savedValues).forEach(fieldId => {
+                                if (fieldId === targetSelectId) {
+                                    this.setSelectValue(fieldId, nilai);
+                                } else {
+                                    this.setSelectValue(fieldId, savedValues[fieldId]);
+                                    const el = document.getElementById(fieldId);
+                                    if (el && !this.tomSelectInstances[fieldId]) {
+                                        el.value = savedValues[fieldId];
+                                    }
                                 }
-                            }
-                        });
+                            });
+                        }
+                    } else {
+                        Utils.closeModal('modal-quick-add-master');
+                        Utils.showToast((res && res.message) || 'Gagal menambahkan item master.', 'error');
                     }
-                } else {
-                    Utils.showToast(res.message || 'Gagal menambahkan item master.', 'error');
+                } catch (err) {
+                    Utils.hideLoading();
+                    Utils.closeModal('modal-quick-add-master');
+                    Utils.showToast('Terjadi kesalahan: ' + err.message, 'error');
                 }
             },
 
