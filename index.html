@@ -184,10 +184,10 @@
     <div id="login-screen" class="fixed inset-0 z-40 bg-slate-100 flex items-center justify-center p-4">
         <div class="card-modern w-full max-w-md p-8 border-t-4 border-t-[#D50000]">
             <div class="text-center mb-8">
-                <div class="inline-flex items-center justify-center w-16 h-16 bg-red-50 text-[#D50000] rounded-2xl mb-3 shadow-inner">
-                    <span class="material-symbols-outlined text-3xl">analytics</span>
+                <div class="inline-flex items-center justify-center w-16 h-16 mb-3">
+                    <img src="logo.png" alt="SURYATOKOKU Logo" class="w-full h-full object-contain" onerror="this.src='https://placehold.co/64x64/D50000/ffffff?text=STK'">
                 </div>
-                <h1 class="text-2xl font-bold text-slate-800">Suryatokoku Supplier</h1>
+                <h1 class="text-2xl font-bold text-slate-800 tracking-tight">SURYATOKOKU</h1>
                 <p class="text-sm text-slate-500 mt-1">Monitoring Program & Klaim Supplier</p>
             </div>
 
@@ -196,7 +196,7 @@
                     <label class="block text-xs font-semibold uppercase text-slate-600 mb-2">Username</label>
                     <div class="relative">
                         <span class="material-symbols-outlined absolute left-3 top-2.5 text-slate-400">person</span>
-                        <input type="text" id="login-username" required class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:bg-white outline-none text-sm transition" placeholder="Username (misal: admin)" value="admin">
+                        <input type="text" id="login-username" required class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:bg-white outline-none text-sm transition" placeholder="Username">
                     </div>
                 </div>
 
@@ -204,7 +204,7 @@
                     <label class="block text-xs font-semibold uppercase text-slate-600 mb-2">Password</label>
                     <div class="relative">
                         <span class="material-symbols-outlined absolute left-3 top-2.5 text-slate-400">lock</span>
-                        <input type="password" id="login-password" required class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:bg-white outline-none text-sm transition" placeholder="Password (misal: admin123)" value="admin123">
+                        <input type="password" id="login-password" required class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:bg-white outline-none text-sm transition" placeholder="Password">
                     </div>
                 </div>
 
@@ -224,11 +224,11 @@
     <aside id="sidebar" class="w-64 bg-white border-r border-slate-200 flex flex-col z-30 transition-all duration-300 -translate-x-full fixed h-full shadow-2xl">
         <div class="p-5 border-b border-slate-100 flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-[#D50000] text-white rounded-xl flex items-center justify-center font-bold text-lg shadow-md shadow-red-500/20">
-                    S
+                <div class="w-10 h-10 rounded-xl overflow-hidden flex items-center justify-center flex-shrink-0">
+                    <img src="logo.png" alt="SURYATOKOKU Logo" class="w-full h-full object-contain" onerror="this.src='https://placehold.co/40x40/D50000/ffffff?text=STK'">
                 </div>
                 <div>
-                    <h2 class="font-bold text-slate-800 text-sm leading-tight">Suryatokoku</h2>
+                    <h2 class="font-bold text-slate-800 text-sm leading-tight">SURYATOKOKU</h2>
                     <p class="text-[10px] text-slate-400 font-medium">Program Monitoring</p>
                 </div>
             </div>
@@ -1493,7 +1493,7 @@
         };
 
         // ------------------------------------------
-        // MODULE 3: API REST CLIENT (GAS CONNECTION WITH MOCK FALLBACK)
+        // MODULE 3: API REST CLIENT (GAS CONNECTION)
         // ------------------------------------------
         const ApiClient = {
             async request(action, payload = {}) {
@@ -1503,7 +1503,7 @@
                 if (CONFIG.API_URL && CONFIG.API_URL.trim() !== '') {
                     try {
                         const controller = new AbortController();
-                        const timeoutId = setTimeout(() => controller.abort(), 6000);
+                        const timeoutId = setTimeout(() => controller.abort(), 10000);
 
                         const response = await fetch(CONFIG.API_URL, {
                             method: 'POST',
@@ -1516,116 +1516,33 @@
                         const text = await response.text();
                         try {
                             const resJson = JSON.parse(text);
-                            if (resJson.success) return resJson;
-                            return this.mockResponse(action, payload);
+                            return resJson;
                         } catch (parseErr) {
-                            console.warn('GAS Non-JSON Response, falling back to mock mode...');
-                            return this.mockResponse(action, payload);
+                            console.error('GAS Non-JSON Response:', text);
+                            return { success: false, message: 'Respon dari server GAS tidak valid.' };
                         }
                     } catch (err) {
-                        console.warn('API Call Error/Timeout, using Interactive Mock Mode:', err.message);
-                        return this.mockResponse(action, payload);
+                        console.error('API Call Error:', err);
+                        return { success: false, message: 'Gagal menghubungi server GAS API.' };
                     }
                 } else {
-                    return this.mockResponse(action, payload);
+                    return this.emptyFallbackResponse(action, payload);
                 }
             },
 
-            mockResponse(action, payload) {
+            emptyFallbackResponse(action, payload) {
                 return new Promise((resolve) => {
                     setTimeout(() => {
                         if (action === 'login') {
                             resolve({
                                 success: true,
-                                token: 'mock-token-session-12345',
-                                user: { username: payload.username || 'admin', nama_lengkap: 'Administrator', role: 'Admin' }
+                                token: 'session-token-demo',
+                                user: { username: payload.username || 'admin', nama_lengkap: 'User System', role: 'Admin' }
                             });
-                        } else if (action === 'getMasterData') {
-                            resolve({
-                                success: true,
-                                data: CACHE.mockMasterData || [
-                                    { id: 'MST-101', kategori: 'NAMA_GRUP_BRAND', nilai: 'Group Nutrisi', urutan: 1, status_aktif: true },
-                                    { id: 'MST-102', kategori: 'NAMA_GRUP_BRAND', nilai: 'Group Personal Care', urutan: 2, status_aktif: true },
-                                    { id: 'MST-201', kategori: 'NAMA_BRAND', nilai: 'Brand Dancow', urutan: 1, status_aktif: true },
-                                    { id: 'MST-202', kategori: 'NAMA_BRAND', nilai: 'Brand Milo', urutan: 2, status_aktif: true },
-                                    { id: 'MST-203', kategori: 'NAMA_BRAND', nilai: 'Brand Wardah', urutan: 3, status_aktif: true },
-                                    { id: 'MST-301', kategori: 'CHANNEL', nilai: 'Indomaret', urutan: 1, status_aktif: true },
-                                    { id: 'MST-302', kategori: 'CHANNEL', nilai: 'Alfamart', urutan: 2, status_aktif: true },
-                                    { id: 'MST-401', kategori: 'MEKANISME_KLAIM', nilai: 'Potongan Tagihan', urutan: 1, status_aktif: true },
-                                    { id: 'MST-402', kategori: 'MEKANISME_KLAIM', nilai: 'Transfer Bank', urutan: 2, status_aktif: true },
-                                    { id: 'MST-403', kategori: 'MEKANISME_KLAIM', nilai: 'Ganti Produk', urutan: 3, status_aktif: true },
-                                    { id: 'MST-501', kategori: 'METODE_KLAIM', nilai: 'CN (Credit Note)', urutan: 1, status_aktif: true },
-                                    { id: 'MST-601', kategori: 'STATUS_KLAIM', nilai: 'Draft / Belum Diklaim', urutan: 1, status_aktif: true },
-                                    { id: 'MST-602', kategori: 'STATUS_KLAIM', nilai: 'Proses Verifikasi', urutan: 2, status_aktif: true },
-                                    { id: 'MST-603', kategori: 'STATUS_KLAIM', nilai: 'Disetujui', urutan: 3, status_aktif: true },
-                                    { id: 'MST-604', kategori: 'STATUS_KLAIM', nilai: 'Selesai / Paid', urutan: 4, status_aktif: true },
-                                    { id: 'MST-701', kategori: 'STATUS_PENCAPAIAN', nilai: 'Tercapai', urutan: 1, status_aktif: true },
-                                    { id: 'MST-801', kategori: 'NAMA_PROGRAM', nilai: 'Display Contest Q3', urutan: 1, status_aktif: true },
-                                    { id: 'MST-901', kategori: 'STATUS_PEMAKAIAN_BUDGET', nilai: 'On Track', urutan: 1, status_aktif: true }
-                                ]
-                            });
-                        } else if (action === 'getSellOutData') {
-                            resolve({
-                                success: true,
-                                data: CACHE.mockSellOutData || [
-                                    { id: 'SOUT-202608-0001', periode_bulan: '2026-08', nama_grup_brand: 'Group Nutrisi', nama_brand: 'Brand Dancow', channel: 'Indomaret', budget_skp: 15000000, nominal_klaim: 12500000, promo_nama_event: 'Promo Gebyar Agustus 17%', nomor_skp: 'SKP/2026/081', mekanisme_klaim: 'Ganti Produk', metode_klaim: 'CN (Credit Note)', status_klaim: 'Proses Verifikasi', tanggal_diklaim: '2026-08-02' }
-                                ]
-                            });
-                        } else if (action === 'getSellInData') {
-                            resolve({
-                                success: true,
-                                data: CACHE.mockSellInData || [
-                                    { id: 'SIN-202608-0001', periode_bulan: '2026-08', nama_program: 'Display Contest Q3', nama_grup_brand: 'Group Nutrisi', nama_brand: 'Brand Milo', target: 50000000, cashback: 5000000, nominal_klaim: 5000000, nilai_ach: 105, status_pencapaian: 'Tercapai', mekanisme_klaim: 'Potongan Tagihan', metode_klaim: 'CN (Credit Note)', status_klaim: 'Disetujui', tanggal_diklaim: '2026-08-01' }
-                                ]
-                            });
-                        } else if (action === 'getKlaimBarangData') {
-                            resolve({
-                                success: true,
-                                data: CACHE.mockKlaimBarangData || [
-                                    { id: 'KLM-202608-0001', sumber_program: 'SELL_OUT', ref_id_program: 'SOUT-202608-0001', periode_bulan: '2026-08', nama_grup_brand: 'Group Nutrisi', nama_brand: 'Brand Dancow', nominal_klaim: 12500000, nominal_het: 14000000, nominal_hpp: 11000000, selisih: 1500000, nomor_po_csa: 'PO-CSA-9921', status_klaim: 'Proses Verifikasi' }
-                                ]
-                            });
-                        } else if (action === 'getBudgetData') {
-                            resolve({
-                                success: true,
-                                data: CACHE.mockBudgetData || [
-                                    { id: 'BUD-202608-0001', sumber_program: 'SELL_OUT', ref_id_program: 'SOUT-202608-0001', periode_bulan: '2026-08', nama_grup_brand: 'Group Nutrisi', nama_brand: 'Brand Dancow', channel: 'Indomaret', nominal_budget: 15000000, tanggal_pemakaian: '2026-08-02', pemakaian_budget: 'Sewa Ambalan Display Merdeka', status_pemakaian: 'On Track' }
-                                ]
-                            });
-                        } else if (action === 'getUsers') {
-                            resolve({
-                                success: true,
-                                data: [
-                                    { username: 'admin', nama_lengkap: 'Administrator System', role: 'Admin', status_aktif: true, last_login: '2026-08-03 08:00:00' },
-                                    { username: 'user', nama_lengkap: 'User Operasional', role: 'User', status_aktif: true, last_login: '2026-08-01 10:00:00' }
-                                ]
-                            });
-                        } else if (action === 'getLogHistory') {
-                            resolve({
-                                success: true,
-                                data: [
-                                    { id: 'LOG-001', tanggal: '2026-08-03', jam: '08:05:00', user_login: 'admin', aksi: 'LOGIN', nama_menu: 'AUTHENTICATION', id_data: 'admin', perubahan_lama: '-', perubahan_baru: 'User logged in' }
-                                ]
-                            });
-                        } else if (action === 'saveMasterItem') {
-                            const newMst = payload.data;
-                            if (!newMst.id) newMst.id = 'MST-' + Date.now();
-                            if (!CACHE.mockMasterData) CACHE.mockMasterData = [];
-                            CACHE.mockMasterData.push(newMst);
-                            resolve({ success: true, message: 'Master item berhasil disimpan.', data: newMst });
-                        } else if (action === 'deleteMasterItem') {
-                            const delId = String(payload.id).trim();
-                            if (CACHE.mockMasterData) {
-                                CACHE.mockMasterData = CACHE.mockMasterData.filter(x => String(x.id).trim() !== delId);
-                            }
-                            if (CACHE.masterRaw) {
-                                CACHE.masterRaw = CACHE.masterRaw.filter(x => String(x.id).trim() !== delId);
-                            }
-                            resolve({ success: true, message: 'Master item berhasil dihapus.' });
                         } else {
-                            resolve({ success: true, message: 'Transaksi berhasil diproses.', data: payload.data || {} });
+                            resolve({ success: true, data: [] });
                         }
-                    }, 150);
+                    }, 100);
                 });
             }
         };
@@ -2117,10 +2034,10 @@
                     this.chartBrand = new Chart(ctxBrand, {
                         type: 'bar',
                         data: {
-                            labels: Object.keys(brandMap).length ? Object.keys(brandMap) : ['Dancow', 'Milo', 'Wardah'],
+                            labels: Object.keys(brandMap).length ? Object.keys(brandMap) : ['Belum Ada Data'],
                             datasets: [{
                                 label: 'Nominal Budget (Rp)',
-                                data: Object.keys(brandMap).length ? Object.values(brandMap) : [15000000, 20000000, 10000000],
+                                data: Object.keys(brandMap).length ? Object.values(brandMap) : [0],
                                 backgroundColor: '#D50000',
                                 borderRadius: 8
                             }]
@@ -2142,10 +2059,10 @@
                     this.chartBulan = new Chart(ctxBulan, {
                         type: 'line',
                         data: {
-                            labels: sortedMonths.length ? sortedMonths.map(m => Utils.formatPeriodeBulan(m)) : ['Juni 2026', 'Juli 2026', 'Agustus 2026'],
+                            labels: sortedMonths.length ? sortedMonths.map(m => Utils.formatPeriodeBulan(m)) : ['Belum Ada Data'],
                             datasets: [{
                                 label: 'Klaim (Rp)',
-                                data: sortedMonths.length ? sortedMonths.map(k => monthMap[k]) : [8000000, 12000000, 17500000],
+                                data: sortedMonths.length ? sortedMonths.map(k => monthMap[k]) : [0],
                                 borderColor: '#2563EB',
                                 backgroundColor: 'rgba(37, 99, 235, 0.1)',
                                 fill: true,
@@ -2312,10 +2229,10 @@
                 if (res.success) {
                     CACHE.updateCacheItem('sellOut', payload);
                     Utils.closeModal('modal-sell-out');
-                    Utils.showToast(res.message, 'success');
+                    Utils.showToast(res.message || 'Data Sell Out berhasil disimpan.', 'success');
                     this.renderSellOutTable();
                 } else {
-                    Utils.showToast(res.message, 'error');
+                    Utils.showToast(res.message || 'Gagal menyimpan data.', 'error');
                 }
             },
 
@@ -2466,10 +2383,10 @@
                 if (res.success) {
                     CACHE.updateCacheItem('sellIn', payload);
                     Utils.closeModal('modal-sell-in');
-                    Utils.showToast(res.message, 'success');
+                    Utils.showToast(res.message || 'Data Sell In berhasil disimpan.', 'success');
                     this.renderSellInTable();
                 } else {
-                    Utils.showToast(res.message, 'error');
+                    Utils.showToast(res.message || 'Gagal menyimpan data.', 'error');
                 }
             },
 
@@ -2615,10 +2532,10 @@
                 if (res.success) {
                     CACHE.updateCacheItem('klaimBarang', { ...CACHE.klaimBarang.find(x => x.id === payload.id), ...payload, selisih: payload.nominal_het - Number(document.getElementById('kb-nominal-klaim-val').value) });
                     Utils.closeModal('modal-klaim-barang');
-                    Utils.showToast(res.message, 'success');
+                    Utils.showToast(res.message || 'Klaim barang berhasil disimpan.', 'success');
                     this.renderKlaimBarangTable();
                 } else {
-                    Utils.showToast(res.message, 'error');
+                    Utils.showToast(res.message || 'Gagal mengupdate klaim barang.', 'error');
                 }
             },
 
@@ -2810,10 +2727,10 @@
                 if (res.success) {
                     CACHE.updateCacheItem('budget', payload);
                     Utils.closeModal('modal-budget');
-                    Utils.showToast(res.message, 'success');
+                    Utils.showToast(res.message || 'Pemakaian budget berhasil disimpan.', 'success');
                     this.renderBudgetTable();
                 } else {
-                    Utils.showToast(res.message, 'error');
+                    Utils.showToast(res.message || 'Gagal menyimpan pemakaian budget.', 'error');
                 }
             },
 
@@ -3084,8 +3001,6 @@
                 Utils.hideLoading();
 
                 if (res.success) {
-                    if (!CACHE.mockMasterData) CACHE.mockMasterData = CACHE.masterRaw || [];
-                    CACHE.mockMasterData.push(payload);
                     if (!CACHE.masterRaw) CACHE.masterRaw = [];
                     CACHE.masterRaw.push(payload);
                     CACHE.processMasterGroup(CACHE.masterRaw);
@@ -3120,7 +3035,7 @@
                         });
                     }
                 } else {
-                    Utils.showToast(res.message, 'error');
+                    Utils.showToast(res.message || 'Gagal menambahkan item master.', 'error');
                 }
             },
 
@@ -3159,10 +3074,10 @@
                     CACHE.masterRaw.push(payload);
                     CACHE.processMasterGroup(CACHE.masterRaw);
                     Utils.closeModal('modal-master');
-                    Utils.showToast(res.message, 'success');
+                    Utils.showToast(res.message || 'Master item berhasil disimpan.', 'success');
                     this.renderMasterTable();
                 } else {
-                    Utils.showToast(res.message, 'error');
+                    Utils.showToast(res.message || 'Gagal menyimpan master item.', 'error');
                 }
             },
 
@@ -3174,9 +3089,6 @@
                 if (res.success) {
                     const targetId = String(id).trim();
                     CACHE.masterRaw = CACHE.masterRaw.filter(x => String(x.id).trim() !== targetId);
-                    if (CACHE.mockMasterData) {
-                        CACHE.mockMasterData = CACHE.mockMasterData.filter(x => String(x.id).trim() !== targetId);
-                    }
                     CACHE.processMasterGroup(CACHE.masterRaw);
                     Utils.showToast(res.message || 'Item master berhasil dihapus.', 'success');
                     this.renderMasterTable();
@@ -3245,10 +3157,10 @@
                     else CACHE.usersList.unshift({ ...payload, last_login: '-' });
 
                     Utils.closeModal('modal-user');
-                    Utils.showToast(res.message, 'success');
+                    Utils.showToast(res.message || 'Data user berhasil disimpan.', 'success');
                     this.renderUsersTable();
                 } else {
-                    Utils.showToast(res.message, 'error');
+                    Utils.showToast(res.message || 'Gagal menyimpan user.', 'error');
                 }
             },
 
