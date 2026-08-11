@@ -27,6 +27,10 @@
     <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.complete.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
 
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
+
     <style>
         :root {
             --primary-red: #D50000;
@@ -154,6 +158,17 @@
             background-color: #FEF2F2 !important;
             color: #D50000 !important;
             font-weight: 600;
+        }
+
+        .flatpickr-calendar {
+            border-radius: 1rem !important;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1) !important;
+            border: 1px solid #E2E8F0 !important;
+            font-family: 'Inter', sans-serif !important;
+        }
+        .flatpickr-day.selected, .flatpickr-day.selected:hover {
+            background: #D50000 !important;
+            border-color: #D50000 !important;
         }
     </style>
 </head>
@@ -297,7 +312,7 @@
                 </button>
                 <span class="text-xs text-slate-400 hidden sm:inline">|</span>
                 <span id="current-date-badge" class="text-xs font-medium text-slate-500 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200">
-                    11 Aug 2026
+                    --/--/----
                 </span>
             </div>
         </header>
@@ -847,11 +862,11 @@
                     </div>
                     <div>
                         <label class="block font-semibold text-slate-700 mb-1">Tanggal Mulai Promo *</label>
-                        <input type="date" id="so-tgl-mulai" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-red-500">
+                        <input type="text" id="so-tgl-mulai" required placeholder="dd/mm/yyyy" class="datepicker-input w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-red-500">
                     </div>
                     <div>
                         <label class="block font-semibold text-slate-700 mb-1">Tanggal Berakhir Promo *</label>
-                        <input type="date" id="so-tgl-akhir" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-red-500">
+                        <input type="text" id="so-tgl-akhir" required placeholder="dd/mm/yyyy" class="datepicker-input w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-red-500">
                     </div>
                     <div>
                         <label class="block font-semibold text-slate-700 mb-1">Promo / Nama Event *</label>
@@ -892,7 +907,7 @@
                     </div>
                     <div>
                         <label class="block font-semibold text-slate-700 mb-1">Tanggal Diklaim / Diproses</label>
-                        <input type="date" id="so-tgl-diklaim" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-red-500">
+                        <input type="text" id="so-tgl-diklaim" placeholder="dd/mm/yyyy" class="datepicker-input w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-red-500">
                     </div>
                 </div>
 
@@ -1070,7 +1085,7 @@
 
     <!-- MODAL PEMAKAIAN BUDGET -->
     <div id="modal-budget" class="fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4 hidden">
-        <div class="card-modern w-full max-w-xl bg-white overflow-hidden">
+        <div class="card-modern w-full max-w-2xl max-h-[90vh] flex flex-col bg-white overflow-hidden">
             <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50">
                 <h3 class="text-sm font-bold text-slate-800">Input Pemakaian Budget</h3>
                 <button onclick="Utils.closeModal('modal-budget')" class="text-slate-400 hover:text-slate-600">
@@ -1078,7 +1093,7 @@
                 </button>
             </div>
 
-            <form id="form-budget" onsubmit="App.saveBudget(event)" class="p-6 space-y-4 text-xs">
+            <form id="form-budget" onsubmit="App.saveBudget(event)" class="p-6 overflow-y-auto space-y-4 flex-1 text-xs">
                 <input type="hidden" id="bud-id">
 
                 <div class="flex gap-4 p-2 bg-slate-100 rounded-xl">
@@ -1125,33 +1140,31 @@
                     </select>
                 </div>
 
-                <div>
-                    <label class="block font-semibold text-slate-700 mb-1">Nominal Pemakaian Budget (Rp) *</label>
-                    <input type="text" inputmode="numeric" id="bud-nominal" required oninput="Utils.formatCurrencyInput(this)" placeholder="0" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-red-500">
-                </div>
-
-                <div>
-                    <label class="block font-semibold text-slate-700 mb-1">Periode Pemakaian *</label>
-                    <div class="grid grid-cols-2 gap-2">
-                        <div>
-                            <span class="block text-[10px] text-slate-400 mb-0.5">Dari Tanggal</span>
-                            <input type="date" id="bud-tgl-mulai" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-red-500">
-                        </div>
-                        <div>
-                            <span class="block text-[10px] text-slate-400 mb-0.5">Sampai Tanggal</span>
-                            <input type="date" id="bud-tgl-akhir" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-red-500">
-                        </div>
+                <!-- RINCIAN PEMAKAIAN BUDGET MULTI-BARIS -->
+                <div class="space-y-3 border-t border-slate-100 pt-3">
+                    <div class="flex items-center justify-between">
+                        <label class="font-bold text-slate-800">Daftar Rincian Pemakaian Budget</label>
+                        <button type="button" onclick="App.addBudgetRincianRow()" class="px-2.5 py-1 bg-red-50 text-[#D50000] hover:bg-red-100 rounded-lg font-semibold text-xs flex items-center gap-1">
+                            <span class="material-symbols-outlined text-sm">add</span> Tambah Rincian Pemakaian
+                        </button>
                     </div>
+
+                    <div id="bud-rincian-container" class="space-y-2"></div>
                 </div>
 
-                <div>
-                    <label class="block font-semibold text-slate-700 mb-1">Rincian / Keterangan Pemakaian Budget *</label>
-                    <textarea id="bud-keterangan" rows="2" required placeholder="Detail pemakaian dana..." class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-red-500"></textarea>
-                </div>
-
-                <div>
-                    <label class="block font-semibold text-slate-700 mb-1">Status Pemakaian Budget *</label>
-                    <select id="bud-status" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-red-500"></select>
+                <div class="p-3.5 bg-amber-50 rounded-xl border border-amber-200/80 space-y-2">
+                    <div class="flex items-center justify-between text-xs">
+                        <span class="font-semibold text-slate-600">Nominal Acuan Budget:</span>
+                        <span id="bud-acuan-nominal-lbl" class="font-bold text-slate-800">Rp 0</span>
+                    </div>
+                    <div class="flex items-center justify-between text-xs border-t border-amber-200/60 pt-1.5">
+                        <span class="font-semibold text-amber-800">Total Nominal Pemakaian Budget:</span>
+                        <span id="bud-total-nominal-lbl" class="font-bold text-amber-900">Rp 0</span>
+                    </div>
+                    <div class="flex items-center justify-between text-xs border-t border-amber-200/60 pt-1.5">
+                        <span class="font-semibold text-slate-700">Sisa Nominal Budget (Acuan - Pemakaian):</span>
+                        <span id="bud-sisa-nominal-lbl" class="font-bold text-emerald-600 text-sm">Rp 0</span>
+                    </div>
                 </div>
 
                 <div class="pt-4 border-t border-slate-100 flex justify-end gap-2">
@@ -1294,36 +1307,138 @@
                 return 'Rp ' + Number(num).toLocaleString('id-ID');
             },
 
-            sanitizeDate(val) {
-                if (!val || typeof val !== 'string' || val.trim() === '') return null;
-                let str = val.trim();
+            initDatePicker(selectorOrElement) {
+                if (typeof flatpickr !== 'undefined') {
+                    flatpickr(selectorOrElement, {
+                        dateFormat: "Y-m-d",
+                        altInput: true,
+                        altFormat: "d/m/Y",
+                        altInputClass: "w-full p-2 bg-white border border-slate-200 rounded-lg outline-none focus:ring-1 focus:ring-red-500 text-xs font-medium",
+                        locale: "id",
+                        allowInput: true
+                    });
+                }
+            },
 
-                if (/^\d{2}[-/]\d{2}[-/]\d{4}$/.test(str)) {
-                    const parts = str.split(/[-/]/);
-                    return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+            setDateValue(idOrEl, val) {
+                const el = typeof idOrEl === 'string' ? document.getElementById(idOrEl) : idOrEl;
+                if (!el) return;
+                const cleanDate = Utils.sanitizeDate(val) || '';
+                if (el._flatpickr) {
+                    el._flatpickr.setDate(cleanDate, true);
+                } else {
+                    el.value = cleanDate;
                 }
-                if (/^\d{1,2}[-/]\d{1,2}[-/]\d{4}$/.test(str)) {
-                    const parts = str.split(/[-/]/);
-                    return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+            },
+
+            sanitizeDate(val) {
+                if (!val || val === 'null' || val === 'undefined') return null;
+                if (typeof val !== 'string') {
+                    if (val instanceof Date && !isNaN(val.getTime())) {
+                        const y = val.getFullYear();
+                        const m = String(val.getMonth() + 1).padStart(2, '0');
+                        const d = String(val.getDate()).padStart(2, '0');
+                        return `${y}-${m}-${d}`;
+                    }
+                    val = String(val);
                 }
-                if (/^\d{4}[-/]\d{2}[-/]\d{2}$/.test(str)) {
-                    return str.replace(/\//g, '-');
+                let str = val.trim();
+                if (!str) return null;
+
+                // YYYY-MM-DD or YYYY/MM/DD
+                if (/^\d{4}[-/]\d{1,2}[-/]\d{1,2}/.test(str)) {
+                    const parts = str.slice(0, 10).split(/[-/]/);
+                    return `${parts[0]}-${parts[1].padStart(2, '0')}-${parts[2].padStart(2, '0')}`;
                 }
+
+                // DD-MM-YYYY or MM-DD-YYYY
+                if (/^\d{1,2}[-/]\d{1,2}[-/]\d{4}/.test(str)) {
+                    const parts = str.slice(0, 10).split(/[-/]/);
+                    let p0 = parseInt(parts[0], 10);
+                    let p1 = parseInt(parts[1], 10);
+                    let year = parts[2];
+                    let day, month;
+
+                    if (p0 > 12) {
+                        day = String(p0).padStart(2, '0');
+                        month = String(p1).padStart(2, '0');
+                    } else if (p1 > 12) {
+                        month = String(p0).padStart(2, '0');
+                        day = String(p1).padStart(2, '0');
+                    } else {
+                        day = String(p0).padStart(2, '0');
+                        month = String(p1).padStart(2, '0');
+                    }
+                    return `${year}-${month}-${day}`;
+                }
+
                 if (!isNaN(str) && Number(str) > 30000 && Number(str) < 60000) {
                     const excelDate = new Date((Number(str) - (25567 + 2)) * 86400 * 1000);
                     if (!isNaN(excelDate.getTime())) {
-                        return excelDate.toISOString().slice(0, 10);
+                        const year = excelDate.getFullYear();
+                        const month = String(excelDate.getMonth() + 1).padStart(2, '0');
+                        const day = String(excelDate.getDate()).padStart(2, '0');
+                        return `${year}-${month}-${day}`;
                     }
                 }
+
+                const d = new Date(str);
+                if (!isNaN(d.getTime())) {
+                    const year = d.getFullYear();
+                    const month = String(d.getMonth() + 1).padStart(2, '0');
+                    const day = String(d.getDate()).padStart(2, '0');
+                    return `${year}-${month}-${day}`;
+                }
+
                 return str;
             },
 
             formatDate(dateStr) {
-                if (!dateStr) return '-';
+                if (!dateStr || dateStr === '-' || dateStr === 'null' || dateStr === 'undefined') return '-';
                 try {
-                    const d = new Date(dateStr);
-                    if (isNaN(d.getTime())) return dateStr;
-                    return d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+                    let str = String(dateStr).trim();
+                    if (!str) return '-';
+
+                    let day, month, year;
+
+                    // ISO or YYYY-MM-DD / YYYY/MM/DD -> dd/mm/yyyy
+                    if (/^\d{4}[-/]\d{1,2}[-/]\d{1,2}/.test(str)) {
+                        const parts = str.slice(0, 10).split(/[-/]/);
+                        year = parts[0];
+                        month = parts[1].padStart(2, '0');
+                        day = parts[2].padStart(2, '0');
+                        return `${day}/${month}/${year}`;
+                    }
+
+                    // DD-MM-YYYY or MM-DD-YYYY
+                    if (/^\d{1,2}[-/]\d{1,2}[-/]\d{4}/.test(str)) {
+                        const parts = str.slice(0, 10).split(/[-/]/);
+                        let p0 = parseInt(parts[0], 10);
+                        let p1 = parseInt(parts[1], 10);
+                        year = parts[2];
+
+                        if (p0 > 12) {
+                            day = String(p0).padStart(2, '0');
+                            month = String(p1).padStart(2, '0');
+                        } else if (p1 > 12) {
+                            month = String(p0).padStart(2, '0');
+                            day = String(p1).padStart(2, '0');
+                        } else {
+                            day = String(p0).padStart(2, '0');
+                            month = String(p1).padStart(2, '0');
+                        }
+                        return `${day}/${month}/${year}`;
+                    }
+
+                    const d = new Date(str);
+                    if (!isNaN(d.getTime())) {
+                        day = String(d.getDate()).padStart(2, '0');
+                        month = String(d.getMonth() + 1).padStart(2, '0');
+                        year = d.getFullYear();
+                        return `${day}/${month}/${year}`;
+                    }
+
+                    return dateStr;
                 } catch (e) {
                     return dateStr;
                 }
@@ -1573,7 +1688,14 @@
                     if (resSellOut.data) this.sellOut = resSellOut.data;
                     if (resSellIn.data) this.sellIn = resSellIn.data;
                     if (resKlaim.data) this.klaimBarang = resKlaim.data;
-                    if (resBudget.data) this.budget = resBudget.data;
+                    if (resBudget.data) {
+                        this.budget = resBudget.data.map(item => {
+                            if (!item.acuan_nominal_budget && Array.isArray(item.list_rincian_pemakaian) && item.list_rincian_pemakaian[0]?.acuan_nominal_budget) {
+                                item.acuan_nominal_budget = item.list_rincian_pemakaian[0].acuan_nominal_budget;
+                            }
+                            return item;
+                        });
+                    }
 
                     if (Auth.getUserRole() === 'Admin') {
                         const [resUsers, resLogs] = await Promise.all([
@@ -1907,6 +2029,10 @@
 
             init() {
                 Auth.init();
+                const badge = document.getElementById('current-date-badge');
+                if (badge) {
+                    badge.innerText = Utils.formatDate(new Date());
+                }
             },
 
             applyFilters(type) {
@@ -2094,8 +2220,10 @@
                     this.setSelectValue('so-channel', item.channel || '');
                     this.setSelectValue('so-grup', item.nama_grup_brand || '');
                     this.setSelectValue('so-brand', item.nama_brand || '');
-                    document.getElementById('so-tgl-mulai').value = item.tanggal_mulai || '';
-                    document.getElementById('so-tgl-akhir').value = item.tanggal_berakhir || '';
+                    
+                    Utils.setDateValue('so-tgl-mulai', item.tanggal_mulai);
+                    Utils.setDateValue('so-tgl-akhir', item.tanggal_berakhir);
+                    
                     document.getElementById('so-event').value = item.promo_nama_event || '';
                     document.getElementById('so-nomor-skp').value = item.nomor_skp || '';
                     document.getElementById('so-deskripsi').value = item.deskripsi_promo || '';
@@ -2104,7 +2232,8 @@
                     this.setSelectValue('so-mekanisme', item.mekanisme_klaim || '');
                     this.populateMetodeKlaimDropdown('so', item.mekanisme_klaim, item.metode_klaim);
                     this.setSelectValue('so-status', item.status_klaim || '');
-                    document.getElementById('so-tgl-diklaim').value = item.tanggal_diklaim || '';
+                    
+                    Utils.setDateValue('so-tgl-diklaim', item.tanggal_diklaim);
 
                     if (Array.isArray(item.files_skp)) {
                         this.fileTempStorage.so = [...item.files_skp];
@@ -2114,6 +2243,10 @@
                     document.getElementById('modal-so-title').innerText = 'Tambah Program Sell Out';
                     document.getElementById('so-id').value = '';
                     ['so-channel', 'so-grup', 'so-brand', 'so-mekanisme', 'so-metode', 'so-status'].forEach(k => this.setSelectValue(k, ''));
+                    
+                    Utils.setDateValue('so-tgl-mulai', '');
+                    Utils.setDateValue('so-tgl-akhir', '');
+                    Utils.setDateValue('so-tgl-diklaim', '');
                 }
 
                 this.handleMekanismeChange('so');
@@ -2818,17 +2951,33 @@
             openModalBudget(id = null) {
                 this.populateDropdowns('bud');
 
+                const currentEditingBudgetId = id;
                 const refSelect = document.getElementById('bud-ref-program');
+                
+                // Collect existing used ref_id_programs to filter them out
+                const usedRefIds = new Set(
+                    CACHE.budget
+                        .filter(b => b.sumber_program && b.sumber_program !== 'MANUAL' && b.id !== currentEditingBudgetId)
+                        .map(b => b.ref_id_program)
+                );
+
                 if (refSelect) {
                     let opts = ['<option value="">-- Pilih Program --</option>'];
                     CACHE.sellOut.forEach((item, idx) => {
-                        opts.push(`<option value="SOUT|${item.id}">Sell Out: No. ${idx + 1} - ${item.nama_brand} - ${item.promo_nama_event}</option>`);
+                        if (!usedRefIds.has(item.id) || (id && CACHE.budget.find(b => b.id === id)?.ref_id_program === item.id)) {
+                            opts.push(`<option value="SOUT|${item.id}">Sell Out: No. ${idx + 1} - ${item.nama_brand} - ${item.promo_nama_event}</option>`);
+                        }
                     });
                     CACHE.sellIn.forEach((item, idx) => {
-                        opts.push(`<option value="SIN|${item.id}">Sell In: No. ${idx + 1} - ${item.nama_brand} - ${item.nama_program}</option>`);
+                        if (!usedRefIds.has(item.id) || (id && CACHE.budget.find(b => b.id === id)?.ref_id_program === item.id)) {
+                            opts.push(`<option value="SIN|${item.id}">Sell In: No. ${idx + 1} - ${item.nama_brand} - ${item.nama_program}</option>`);
+                        }
                     });
                     refSelect.innerHTML = opts.join('');
                 }
+
+                const container = document.getElementById('bud-rincian-container');
+                container.innerHTML = '';
 
                 if (id) {
                     const item = CACHE.budget.find(x => x.id === id);
@@ -2838,16 +2987,6 @@
                     this.setSelectValue('bud-channel', item.channel || '');
                     this.setSelectValue('bud-grup', item.nama_grup_brand || '');
                     this.setSelectValue('bud-brand', item.nama_brand || '');
-                    
-                    document.getElementById('bud-nominal').value = Utils.formatCurrencyValue(item.nominal_budget);
-                    
-                    const tglMulai = item.tanggal_mulai_pemakaian || item.tanggal_pemakaian || '';
-                    const tglAkhir = item.tanggal_akhir_pemakaian || tglMulai;
-                    
-                    document.getElementById('bud-tgl-mulai').value = tglMulai;
-                    document.getElementById('bud-tgl-akhir').value = tglAkhir;
-                    document.getElementById('bud-keterangan').value = item.pemakaian_budget || '';
-                    this.setSelectValue('bud-status', item.status_pemakaian || '');
 
                     const isRef = item.sumber_program && item.sumber_program !== 'MANUAL';
                     document.querySelectorAll('input[name="bud-source-type"]').forEach(r => {
@@ -2855,27 +2994,40 @@
                     });
                     this.toggleBudgetSourceMode(isRef ? 'REF' : 'MANUAL');
 
+                    const savedAcuan = item.acuan_nominal_budget || (Array.isArray(item.list_rincian_pemakaian) && item.list_rincian_pemakaian[0]?.acuan_nominal_budget) || '';
+
                     if (isRef && item.ref_id_program) {
                         const typeCode = item.sumber_program === 'SELL_OUT' ? 'SOUT' : 'SIN';
                         refSelect.value = `${typeCode}|${item.ref_id_program}`;
-                        this.handleBudgetProgramSelect();
-                        
+                        this.handleBudgetProgramSelect(savedAcuan);
+                    } else {
                         const acuanSelect = document.getElementById('bud-acuan-nominal');
-                        if (acuanSelect && item.acuan_nominal_budget) {
-                            acuanSelect.value = item.acuan_nominal_budget;
+                        if (acuanSelect && savedAcuan) {
+                            acuanSelect.value = savedAcuan;
                         }
                     }
+
+                    let rincianList = Array.isArray(item.list_rincian_pemakaian) ? item.list_rincian_pemakaian : [];
+                    if (rincianList.length === 0) {
+                        rincianList = [{
+                            nominal: item.nominal_budget || 0,
+                            tgl_mulai: item.tanggal_mulai_pemakaian || item.tanggal_pemakaian || '',
+                            tgl_akhir: item.tanggal_akhir_pemakaian || item.tanggal_mulai_pemakaian || item.tanggal_pemakaian || '',
+                            keterangan: item.pemakaian_budget || '',
+                            status: item.status_pemakaian || 'On Track'
+                        }];
+                    }
+
+                    rincianList.forEach(r => this.addBudgetRincianRow(r.nominal, r.tgl_mulai, r.tgl_akhir, r.keterangan, r.status));
                 } else {
                     document.getElementById('form-budget').reset();
                     document.getElementById('bud-id').value = '';
-                    document.getElementById('bud-nominal').value = '0';
-                    document.getElementById('bud-tgl-mulai').value = '';
-                    document.getElementById('bud-tgl-akhir').value = '';
-                    document.getElementById('bud-keterangan').value = '';
                     ['bud-channel', 'bud-grup', 'bud-brand', 'bud-status', 'bud-acuan-nominal'].forEach(k => this.setSelectValue(k, ''));
                     this.toggleBudgetSourceMode('REF');
+                    this.addBudgetRincianRow();
                 }
 
+                this.calculateBudgetTotals();
                 Utils.openModal('modal-budget');
             },
 
@@ -2887,15 +3039,18 @@
                 }
             },
 
-            handleBudgetProgramSelect() {
+            handleBudgetProgramSelect(selectedAcuan = '') {
                 const val = document.getElementById('bud-ref-program').value;
                 const acuanSelect = document.getElementById('bud-acuan-nominal');
                 if (!acuanSelect) return;
 
                 if (!val) {
                     acuanSelect.innerHTML = '<option value="">-- Pilih Acuan Nominal --</option>';
+                    this.calculateBudgetTotals();
                     return;
                 }
+
+                const currentAcuanVal = selectedAcuan || acuanSelect.value || '';
 
                 const [type, id] = val.split('|');
                 if (type === 'SOUT') {
@@ -2908,8 +3063,8 @@
 
                         acuanSelect.innerHTML = `
                             <option value="">-- Pilih Acuan Nominal --</option>
-                            <option value="BUDGET_SKP">Budget SKP (${Utils.formatRupiah(item.budget_skp)})</option>
-                            <option value="NOMINAL_KLAIM">Nominal Klaim (${Utils.formatRupiah(item.nominal_klaim)})</option>
+                            <option value="BUDGET_SKP" data-amount="${item.budget_skp || 0}">Budget SKP (${Utils.formatRupiah(item.budget_skp)})</option>
+                            <option value="NOMINAL_KLAIM" data-amount="${item.nominal_klaim || 0}">Nominal Klaim (${Utils.formatRupiah(item.nominal_klaim)})</option>
                         `;
                     }
                 } else if (type === 'SIN') {
@@ -2921,21 +3076,134 @@
 
                         acuanSelect.innerHTML = `
                             <option value="">-- Pilih Acuan Nominal --</option>
-                            <option value="CASHBACK">Cashback (${Utils.formatRupiah(item.cashback)})</option>
-                            <option value="NOMINAL_KLAIM">Nominal Klaim (${Utils.formatRupiah(item.nominal_klaim)})</option>
+                            <option value="CASHBACK" data-amount="${item.cashback || 0}">Cashback (${Utils.formatRupiah(item.cashback)})</option>
+                            <option value="NOMINAL_KLAIM" data-amount="${item.nominal_klaim || 0}">Nominal Klaim (${Utils.formatRupiah(item.nominal_klaim)})</option>
                         `;
                     }
                 }
+
+                if (currentAcuanVal) {
+                    acuanSelect.value = currentAcuanVal;
+                }
+
+                this.calculateBudgetTotals();
             },
 
             handleBudgetAcuanChange() {
-                // Keep input manual nominal empty/at default state
+                this.calculateBudgetTotals();
+            },
+
+            addBudgetRincianRow(nominal = 0, tglMulai = '', tglAkhir = '', ket = '', status = 'On Track') {
+                const container = document.getElementById('bud-rincian-container');
+                if (!container) return;
+
+                const rowId = 'bud-row-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
+                const row = document.createElement('div');
+                row.id = rowId;
+                row.className = 'p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs space-y-2 relative';
+
+                const nomVal = (nominal === 0 || !nominal) ? '' : Utils.formatCurrencyValue(nominal);
+                const tglMulaiVal = Utils.sanitizeDate(tglMulai) || '';
+                const tglAkhirVal = Utils.sanitizeDate(tglAkhir) || '';
+
+                row.innerHTML = `
+                    <div class="flex items-center justify-between border-b border-slate-200 pb-1.5">
+                        <span class="font-semibold text-slate-700">Item Pemakaian</span>
+                        <button type="button" onclick="App.removeBudgetRincianRow('${rowId}')" class="text-slate-400 hover:text-red-600 flex items-center gap-1 font-semibold text-[11px]" title="Hapus Rincian">
+                            <span class="material-symbols-outlined text-sm">delete</span> Hapus
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <div>
+                            <label class="block font-semibold text-slate-600 text-[10px] mb-0.5">Nominal Pemakaian (Rp) *</label>
+                            <input type="text" inputmode="numeric" class="bud-row-nominal w-full p-2 bg-white border border-slate-200 rounded-lg outline-none focus:ring-1 focus:ring-red-500" placeholder="0" value="${nomVal}" oninput="Utils.formatCurrencyInput(this); App.calculateBudgetTotals();">
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-600 text-[10px] mb-0.5">Status Pemakaian *</label>
+                            <select class="bud-row-status w-full p-2 bg-white border border-slate-200 rounded-lg outline-none focus:ring-1 focus:ring-red-500" onchange="App.calculateBudgetTotals()">
+                                <option value="On Track" ${status === 'On Track' ? 'selected' : ''}>On Track</option>
+                                <option value="Over Budget" ${status === 'Over Budget' ? 'selected' : ''}>Over Budget</option>
+                                <option value="Selesai" ${status === 'Selesai' ? 'selected' : ''}>Selesai</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-600 text-[10px] mb-0.5">Dari Tanggal *</label>
+                            <input type="text" placeholder="dd/mm/yyyy" class="bud-row-tgl-mulai datepicker-input w-full p-2 bg-white border border-slate-200 rounded-lg outline-none focus:ring-1 focus:ring-red-500" value="${tglMulaiVal}">
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-600 text-[10px] mb-0.5">Sampai Tanggal *</label>
+                            <input type="text" placeholder="dd/mm/yyyy" class="bud-row-tgl-akhir datepicker-input w-full p-2 bg-white border border-slate-200 rounded-lg outline-none focus:ring-1 focus:ring-red-500" value="${tglAkhirVal}">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-600 text-[10px] mb-0.5">Rincian / Keterangan *</label>
+                        <input type="text" class="bud-row-keterangan w-full p-2 bg-white border border-slate-200 rounded-lg outline-none focus:ring-1 focus:ring-red-500" placeholder="Keterangan pemakaian..." value="${ket || ''}">
+                    </div>
+                `;
+
+                container.appendChild(row);
+
+                const tglMulaiEl = row.querySelector('.bud-row-tgl-mulai');
+                const tglAkhirEl = row.querySelector('.bud-row-tgl-akhir');
+
+                if (tglMulaiEl) {
+                    Utils.initDatePicker(tglMulaiEl);
+                    if (tglMulaiVal) Utils.setDateValue(tglMulaiEl, tglMulaiVal);
+                }
+                if (tglAkhirEl) {
+                    Utils.initDatePicker(tglAkhirEl);
+                    if (tglAkhirVal) Utils.setDateValue(tglAkhirEl, tglAkhirVal);
+                }
+
+                this.calculateBudgetTotals();
+            },
+
+            removeBudgetRincianRow(rowId) {
+                const row = document.getElementById(rowId);
+                if (row) {
+                    row.remove();
+                    this.calculateBudgetTotals();
+                }
+            },
+
+            calculateBudgetTotals() {
+                let totalPemakaian = 0;
+                const nominalInputs = document.querySelectorAll('.bud-row-nominal');
+                nominalInputs.forEach(i => totalPemakaian += Utils.parseCurrencyValue(i.value));
+
+                const totalLbl = document.getElementById('bud-total-nominal-lbl');
+                if (totalLbl) totalLbl.innerText = Utils.formatRupiah(totalPemakaian);
+
+                // Calculate Acuan Nominal
+                let nominalAcuan = 0;
+                const acuanSelect = document.getElementById('bud-acuan-nominal');
+                if (acuanSelect && acuanSelect.selectedIndex > 0) {
+                    const selectedOpt = acuanSelect.options[acuanSelect.selectedIndex];
+                    if (selectedOpt) {
+                        nominalAcuan = Number(selectedOpt.getAttribute('data-amount')) || 0;
+                    }
+                }
+
+                const acuanLbl = document.getElementById('bud-acuan-nominal-lbl');
+                if (acuanLbl) acuanLbl.innerText = Utils.formatRupiah(nominalAcuan);
+
+                const sisa = nominalAcuan - totalPemakaian;
+                const sisaLbl = document.getElementById('bud-sisa-nominal-lbl');
+                if (sisaLbl) {
+                    sisaLbl.innerText = Utils.formatRupiah(sisa);
+                    if (sisa < 0) {
+                        sisaLbl.className = 'font-bold text-rose-600 text-sm';
+                    } else {
+                        sisaLbl.className = 'font-bold text-emerald-600 text-sm';
+                    }
+                }
             },
 
             async saveBudget(e) {
                 e.preventDefault();
                 const sourceType = document.querySelector('input[name="bud-source-type"]:checked')?.value || 'MANUAL';
                 const refVal = document.getElementById('bud-ref-program').value;
+                const acuanNominalVal = document.getElementById('bud-acuan-nominal')?.value || '';
 
                 let refId = '';
                 let sumberProg = 'MANUAL';
@@ -2950,24 +3218,52 @@
                 const isEdit = Boolean(existingId);
                 const recordId = existingId || ('BUD-' + Date.now());
 
-                const tglMulai = Utils.sanitizeDate(document.getElementById('bud-tgl-mulai').value);
-                const tglAkhir = Utils.sanitizeDate(document.getElementById('bud-tgl-akhir').value);
+                const rincianRows = document.querySelectorAll('#bud-rincian-container > div');
+                const listRincianPemakaian = [];
+                let totalNominalBudget = 0;
+
+                rincianRows.forEach(row => {
+                    const nom = Utils.parseCurrencyValue(row.querySelector('.bud-row-nominal')?.value);
+                    const tglMulaiEl = row.querySelector('.bud-row-tgl-mulai');
+                    const tglAkhirEl = row.querySelector('.bud-row-tgl-akhir');
+                    const tglMulaiRaw = tglMulaiEl?._flatpickr ? (tglMulaiEl._flatpickr.input.value || tglMulaiEl.value) : tglMulaiEl?.value;
+                    const tglAkhirRaw = tglAkhirEl?._flatpickr ? (tglAkhirEl._flatpickr.input.value || tglAkhirEl.value) : tglAkhirEl?.value;
+                    const tglMulai = Utils.sanitizeDate(tglMulaiRaw);
+                    const tglAkhir = Utils.sanitizeDate(tglAkhirRaw);
+                    const ket = row.querySelector('.bud-row-keterangan')?.value.trim() || '';
+                    const st = row.querySelector('.bud-row-status')?.value || 'On Track';
+
+                    listRincianPemakaian.push({
+                        nominal: nom,
+                        tgl_mulai: tglMulai,
+                        tgl_akhir: tglAkhir,
+                        keterangan: ket,
+                        status: st,
+                        acuan_nominal_budget: acuanNominalVal
+                    });
+                    totalNominalBudget += nom;
+                });
+
+                const primaryRincian = listRincianPemakaian[0] || {};
+                const combinedKeterangan = listRincianPemakaian.map(r => r.keterangan).filter(Boolean).join('; ');
+                const primaryStatus = listRincianPemakaian.find(r => r.status === 'Over Budget')?.status || primaryRincian.status || 'On Track';
 
                 const payload = {
                     id: recordId,
                     sumber_program: sumberProg,
                     ref_id_program: refId,
                     periode_bulan: document.getElementById('bud-periode').value,
-                    acuan_nominal_budget: document.getElementById('bud-acuan-nominal')?.value || '',
+                    acuan_nominal_budget: acuanNominalVal,
                     channel: document.getElementById('bud-channel').value,
                     nama_grup_brand: document.getElementById('bud-grup').value,
                     nama_brand: document.getElementById('bud-brand').value,
-                    nominal_budget: Utils.parseCurrencyValue(document.getElementById('bud-nominal').value),
-                    tanggal_pemakaian: tglMulai,
-                    tanggal_mulai_pemakaian: tglMulai,
-                    tanggal_akhir_pemakaian: tglAkhir,
-                    pemakaian_budget: document.getElementById('bud-keterangan').value,
-                    status_pemakaian: document.getElementById('bud-status').value,
+                    nominal_budget: totalNominalBudget,
+                    list_rincian_pemakaian: listRincianPemakaian,
+                    tanggal_pemakaian: primaryRincian.tgl_mulai,
+                    tanggal_mulai_pemakaian: primaryRincian.tgl_mulai,
+                    tanggal_akhir_pemakaian: primaryRincian.tgl_akhir,
+                    pemakaian_budget: combinedKeterangan,
+                    status_pemakaian: primaryStatus,
                     updated_at: new Date().toISOString()
                 };
 
@@ -2976,6 +3272,7 @@
                     let supaPayload = { ...payload };
                     let { error } = await supabaseClient.from('pemakaian_budget').upsert([supaPayload]);
                     if (error && error.message && error.message.includes('column')) {
+                        delete supaPayload.list_rincian_pemakaian;
                         delete supaPayload.tanggal_akhir_pemakaian;
                         delete supaPayload.tanggal_mulai_pemakaian;
                         delete supaPayload.acuan_nominal_budget;
@@ -3816,6 +4113,7 @@
 
         window.addEventListener('DOMContentLoaded', () => {
             App.init();
+            Utils.initDatePicker('.datepicker-input');
         });
     </script>
 </body>
